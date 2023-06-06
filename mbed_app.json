@@ -1,0 +1,23 @@
+{
+	"macros": [
+		"MBED_CONF_APP_MAIN_STACK_SIZE=8192"
+	    ],
+	"config": {
+		"wifi-ssid": {
+			"help": "WiFi SSID",
+			"value": "\"Freebox-4F25F0\""
+		},
+		"wifi-password": {
+			"help": "WiFi Password",
+			"value": "\"clausuris-inmortale69-valendi-exhortandi\""
+		},
+		"server-hostname": {
+			"help": "Remote Server Host Name",
+			"value": "\"192.168.1.9\""
+		},
+		"server-port": {
+			"help": "CA Server TCP Port",
+			"value": "4443"
+		}
+	}
+}
