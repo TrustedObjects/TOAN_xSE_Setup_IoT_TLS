@@ -1,0 +1,3 @@
+libTO/examples/*
+libTO/src/wrapper/arduino.cpp
+libTO/src/wrapper/stm32_hal.c
