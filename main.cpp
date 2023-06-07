@@ -19,7 +19,7 @@
 #include "sample_https.h"
 
 /* Private defines -----------------------------------------------------------*/
-#define CONNECTION_TRIAL_MAX 10
+#define CONNECTION_TRIAL_MAX 5
 
 enum
 {
@@ -274,7 +274,7 @@ int connect_tls_server(int mode)
 		return -1;
 	}
 
-	while (Trials--)
+	while (Trials)
 	{
 		if (WIFI_OpenClientConnection(0, WIFI_TCP_PROTOCOL, "TCP_CLIENT", RemoteIP, MBED_CONF_APP_SERVER_PORT, 0) == WIFI_STATUS_OK)
 		{
@@ -282,6 +282,7 @@ int connect_tls_server(int mode)
 			Socket = 0;
 			break;
 		}
+		Trials--;
 	}
 	if (!Trials)
 	{
