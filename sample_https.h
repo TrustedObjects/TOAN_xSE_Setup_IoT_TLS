@@ -18,21 +18,6 @@
 #ifndef _SAMPLE_HTTPS_H_
 #define _SAMPLE_HTTPS_H_
 
-/* remove dependancy to TO_defs.h/TO_CERT_X509_MAXSIZE
- * This is only an HSE/SSE internal setting
- * libTO does not have to know this SE internal limit
- */
-#define POC_CERT_X509_MAXSIZE	1024	/* TODO: better HSE/SSE definition ?? */
-
-#define POC_SE_RFU 0
-#define POC_SE_TO136 1
-#define POC_SE_TOPROTECT 2
-
-/*
- * Select SECURE ELEMENT used for this PoC
- */
-#define POC_SECURE_ELEMENT_USED  POC_SE_TOPROTECT
-
 #ifdef __cplusplus
 extern "C" {
 #endif

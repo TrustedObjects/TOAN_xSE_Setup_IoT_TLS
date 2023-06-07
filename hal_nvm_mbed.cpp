@@ -12,7 +12,7 @@
 
 /**
  * @file hal_nvm_mbed.cpp
- * @brief Exemple of HAL NVM implementation for LX6 (uses FlashIAP interface).
+ * @brief Exemple of HAL NVM implementation for Mbed (uses FlashIAP interface).
  */
 
 /*

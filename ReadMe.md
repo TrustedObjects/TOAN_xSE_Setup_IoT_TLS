@@ -65,6 +65,15 @@ You will have to change WiFi credentials, and remote server.
 		}
 	}
 
+## Optional: Select your Secure Element (TO136 or to-protect)
+
+Open POC_settings.h and #define POC_SECURE_ELEMENT_USED accordingly to your choice:
+	- POC_SE_TO136, if you want to test with TO136
+	- POC_SE_TOPROTECT (default), if you want to test with to-protect
+
+If you select TO136, don't forget to mount the board Arduino_TO136
+onto the Arduino R3 connector of the board DISCO_L475VG_IOT01A.
+
 ## Flash the SSE (to-protect version only)
 
 For TO136, skip this step, as TO136 comes ready and personalized by AVNET.
