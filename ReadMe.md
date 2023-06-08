@@ -6,7 +6,7 @@
 
 ## Clone Trusted Object demo
 
-    git clone git@github.com:TrustedObjects/PoC_TO_tls_wifi .
+    git clone git@github.com:TrustedObjects/TOAN_xSE_Setup_IoT_TLS .
     git checkout main
 
 ## Install MBED OS library and DISCO_L475VG_IOT01A_wifi library
