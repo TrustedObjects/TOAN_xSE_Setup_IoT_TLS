@@ -218,7 +218,10 @@ int POC_display_se_infos(void)
 	}
 
 	uint8_t serial[8];
-	errTO = TOSE_get_serial_number(to_se_ctx, serial);
+	uint16_t serial_length;
+
+	serial_length = sizeof(serial);
+ 	errTO = TOSE_get_serial_number(to_se_ctx, serial, &serial_length);
 	if (errTO != TORSP_SUCCESS)
 	{
 		TO_LOG_ERR("TO_KO: %d, %d", __LINE__, errTO);
