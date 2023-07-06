@@ -49,14 +49,14 @@ int main(int argc, char *argv[])
 	index = atoi(argv[1]);
 	output_file = argv[2];
 
-	if (TO_init() != TO_OK) {
+	if (TOSE_init(DEFAULT_CTX) != TO_OK) {
 		fprintf(stderr, "Unable to initialize Secure Element\n");
 		ret = -2;
 		goto err;
 	}
 	printf("Secure Element initialized\n");
 
-	if (TO_get_certificate_x509(index, certificate, &size)
+	if (TOSE_get_certificate_x509(DEFAULT_CTX, index, certificate, &size)
 			!= TORSP_SUCCESS) {
 		fprintf(stderr, "Unable to get certificate %d\n", index);
 		ret = -3;
@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
 
 	ret = 0;
 err:
-	TO_fini();
+	TOSE_fini(DEFAULT_CTX);
 	return ret;
 }
 

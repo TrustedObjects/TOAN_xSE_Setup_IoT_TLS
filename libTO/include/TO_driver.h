@@ -211,14 +211,13 @@ typedef uint32_t (TODRV_ctx_get_size_f)(void);
 typedef TO_ret_t (TODRV_init_f)(void *priv_ctx, TO_log_ctx_t *log_ctx);
 typedef TO_ret_t (TODRV_fini_f)(void *priv_ctx);
 #if TODRV_API_CONFIG_TO_INFO > 0
-typedef TO_ret_t (TODRV_get_serial_number_f)(void *priv_ctx,uint8_t serial_number[TO_SN_SIZE]);
-typedef TO_ret_t (TODRV_get_product_number_f)(void *priv_ctx,uint8_t product_number[TO_PN_SIZE]);
-typedef TO_ret_t (TODRV_get_hardware_version_f)(void *priv_ctx,
-		uint8_t hardware_version[TO_HW_VERSION_SIZE]);
-typedef TO_ret_t (TODRV_get_hardware_serial_number_f)(void *priv_ctx, uint8_t hardware_serial_number[TO_HW_SN_SIZE]);
+typedef TO_ret_t (TODRV_get_serial_number_f)(void *priv_ctx, uint8_t *serial_number, uint16_t *serial_number_length);
+typedef TO_ret_t (TODRV_get_product_number_f)(void *priv_ctx, uint8_t *product_number, uint16_t *product_number_length);
+typedef TO_ret_t (TODRV_get_hardware_version_f)(void *priv_ctx, uint8_t *hardware_version, uint16_t *hardware_version_length);
+typedef TO_ret_t (TODRV_get_hardware_serial_number_f)(void *priv_ctx, uint8_t *hardware_serial_number, uint16_t *hardware_serial_number_length);
 typedef TO_ret_t (TODRV_get_software_version_f)(void *priv_ctx,uint8_t* major, uint8_t* minor,
 		uint8_t* revision);
-typedef TO_ret_t (TODRV_get_product_id_f)(void *priv_ctx,uint8_t product_id[TO_PRODUCT_ID_SIZE]);
+typedef TO_ret_t (TODRV_get_product_id_f)(void *priv_ctx,uint8_t *product_id, uint16_t *product_id_length);
 typedef TO_ret_t (TODRV_access_dummy_data_f)(void *ctx,	uint8_t write_data, uint32_t* dummy_data);
 #endif
 #if TODRV_API_CONFIG_SHA256 > 0
@@ -229,69 +228,76 @@ typedef TO_ret_t (TODRV_sha256_update_f)(void *priv_ctx,const uint8_t* data, con
 typedef TO_ret_t (TODRV_sha256_final_f)(void *priv_ctx,uint8_t sha256[TO_SHA256_HASHSIZE]);
 #endif
 #if TODRV_API_CONFIG_KEYS_MGMT > 0
-typedef TO_ret_t (TODRV_set_remote_public_key_f)(void *priv_ctx,const uint8_t key_index,
+typedef TO_ret_t (TODRV_set_remote_public_key_f)(void *priv_ctx,
+		const uint8_t key_index,
 		const uint8_t public_key[TO_ECC_PUB_KEYSIZE],
 		const uint8_t signature[TO_SIGNATURE_SIZE]);
 typedef TO_ret_t (TODRV_renew_ecc_keys_f)(void *priv_ctx,const uint8_t key_index);
-typedef TO_ret_t (TODRV_get_public_key_f)(void *priv_ctx,const uint8_t key_index,
-		uint8_t public_key[TO_ECC_PUB_KEYSIZE],
-		uint8_t signature[TO_SIGNATURE_SIZE]);
-typedef TO_ret_t (TODRV_get_unsigned_public_key_f)(void *priv_ctx,const uint8_t key_index,
-		uint8_t public_key[TO_ECC_PUB_KEYSIZE]);
+typedef TO_ret_t (TODRV_get_public_key_f)(void *priv_ctx,
+		const uint8_t key_index,
+		uint8_t *public_key,
+		uint16_t *public_key_length,
+		uint8_t *signature,
+		uint16_t *signature_length);
+typedef TO_ret_t (TODRV_get_unsigned_public_key_f)(void *priv_ctx,
+		const uint8_t key_index,
+		uint8_t *public_key,
+		uint16_t *public_key_length);
 typedef TO_ret_t (TODRV_renew_shared_keys_f)(void *priv_ctx,const uint8_t key_index,
 		const uint8_t public_key_index);
-typedef TO_ret_t (TODRV_get_key_fingerprint_f)(void *priv_ctx,TO_key_type_t key_type,
+typedef TO_ret_t (TODRV_get_key_fingerprint_f)(void *priv_ctx,
+		TO_key_type_t key_type,
 		uint8_t key_index,
 		uint8_t* fingerprint[TO_KEY_FINGERPRINT_SIZE]);
 #endif
 #if TODRV_API_CONFIG_AES_ENCRYPT > 0
-typedef TO_ret_t (TODRV_aes128cbc_encrypt_f)(void *priv_ctx,const uint8_t key_index,
-		const uint8_t* data, const uint16_t data_length,
+typedef TO_ret_t (TODRV_aes128cbc_encrypt_f)(void *priv_ctx, const uint8_t key_index,
+		const uint8_t *data, const uint16_t data_length,
 		uint8_t initial_vector[TO_INITIALVECTOR_SIZE],
-		uint8_t* cryptogram);
+		uint8_t *cryptogram, uint16_t *cryptogram_length);
 typedef TO_ret_t (TODRV_aes128cbc_iv_encrypt_f)(void *priv_ctx,const uint8_t key_index,
 		const uint8_t initial_vector[TO_INITIALVECTOR_SIZE],
-		const uint8_t* data, const uint16_t data_length,
-		uint8_t* cryptogram);
+		const uint8_t *data, const uint16_t data_length,
+		uint8_t *cryptogram, uint16_t *cryptogram_length);
 typedef TO_ret_t (TODRV_aes128cbc_decrypt_f)(void *priv_ctx,const uint8_t key_index,
 		const uint8_t initial_vector[TO_INITIALVECTOR_SIZE],
-		const uint8_t* cryptogram, const uint16_t cryptogram_length,
-		uint8_t* data);
+		const uint8_t *cryptogram, const uint16_t cryptogram_length,
+		uint8_t *data, uint16_t *data_length);
 typedef TO_ret_t (TODRV_aes128gcm_encrypt_f)(void *priv_ctx,const uint8_t key_index,
-		const uint8_t* data, const uint16_t data_length,
-		const uint8_t* aad, const uint16_t aad_length,
+		const uint8_t*data, const uint16_t data_length,
+		const uint8_t*aad, const uint16_t aad_length,
 		uint8_t initial_vector[TO_AESGCM_INITIALVECTOR_SIZE],
-		uint8_t* cryptogram, uint8_t tag[TO_AESGCM_TAG_SIZE]);
+		uint8_t *cryptogram, uint16_t *cryptogram_length, uint8_t tag[TO_AESGCM_TAG_SIZE]);
 typedef TO_ret_t (TODRV_aes128gcm_decrypt_f)(void *priv_ctx,const uint8_t key_index,
 		const uint8_t initial_vector[TO_AESGCM_INITIALVECTOR_SIZE],
-		const uint8_t* aad, const uint16_t aad_length,
-		const uint8_t* cryptogram, const uint16_t cryptogram_length,
-		const uint8_t tag[TO_AESGCM_TAG_SIZE], uint8_t* data);
+		const uint8_t *aad, const uint16_t aad_length,
+		const uint8_t *cryptogram, const uint16_t cryptogram_length,
+		const uint8_t tag[TO_AESGCM_TAG_SIZE], uint8_t *data, uint16_t *data_length);
 typedef TO_ret_t (TODRV_aes128ccm_encrypt_f)(void *priv_ctx,const uint8_t key_index,
-		const uint8_t* data, const uint16_t data_length,
-		const uint8_t* aad, const uint16_t aad_length,
+		const uint8_t *data, const uint16_t data_length,
+		const uint8_t *aad, const uint16_t aad_length,
 		uint8_t nonce[TO_AESCCM_NONCE_SIZE],
-		uint8_t* cryptogram, uint8_t tag[TO_AESCCM_TAG_SIZE]);
+		uint8_t *cryptogram, const uint16_t *cryptogram_length, uint8_t tag[TO_AESCCM_TAG_SIZE]);
 typedef TO_ret_t (TODRV_aes128ccm_decrypt_f)(void *priv_ctx,const uint8_t key_index,
 		const uint8_t nonce[TO_AESCCM_NONCE_SIZE],
-		const uint8_t* aad, const uint16_t aad_length,
-		const uint8_t* cryptogram, const uint16_t cryptogram_length,
-		const uint8_t tag[TO_AESCCM_TAG_SIZE], uint8_t* data);
+		const uint8_t *aad, const uint16_t aad_length,
+		const uint8_t *cryptogram, const uint16_t cryptogram_length,
+		const uint8_t tag[TO_AESCCM_TAG_SIZE], uint8_t *data, uint16_t *data_length);
 typedef TO_ret_t (TODRV_aes128ecb_encrypt_f)(void *priv_ctx,const uint8_t key_index,
-		const uint8_t* data, const uint16_t data_length,
-		uint8_t* cryptogram);
+		const uint8_t *data, const uint16_t data_length,
+		uint8_t *cryptogram, const uint16_t *cryptogram_length);
 typedef TO_ret_t (TODRV_aes128ecb_decrypt_f)(void *priv_ctx,const uint8_t key_index,
-		const uint8_t* cryptogram, const uint16_t cryptogram_length,
-		uint8_t* data);
+		const uint8_t *cryptogram, const uint16_t cryptogram_length,
+		uint8_t *data, uint16_t *data_length);
 #endif
 #if TODRV_API_CONFIG_HMAC > 0
 typedef TO_ret_t (TODRV_compute_hmac_f)(void *priv_ctx,const uint8_t key_index, const uint8_t* data,
-		const uint16_t data_length, uint8_t hmac_data[TO_HMAC_SIZE]);
+		const uint16_t data_length, uint8_t *hmac, uint16_t *hmac_length);
 typedef TO_ret_t (TODRV_compute_hmac_init_f)(void *priv_ctx,uint8_t key_index);
 typedef TO_ret_t (TODRV_compute_hmac_update_f)(void *priv_ctx,const uint8_t* data, uint16_t length);
-typedef TO_ret_t (TODRV_compute_hmac_final_f)(void *priv_ctx,uint8_t hmac[TO_HMAC_SIZE]);
+typedef TO_ret_t (TODRV_compute_hmac_final_f)(void *priv_ctx,uint8_t *hmac, uint16_t *hmac_length);
 typedef TO_ret_t (TODRV_verify_hmac_f)(void *priv_ctx,const uint8_t key_index, const uint8_t* data,
-		const uint16_t data_length, const uint8_t hmac_data[TO_HMAC_SIZE]);
+		const uint16_t data_length, const uint8_t hmac[TO_HMAC_SIZE]);
 typedef TO_ret_t (TODRV_verify_hmac_init_f)(void *priv_ctx,uint8_t key_index);
 typedef TO_ret_t (TODRV_verify_hmac_update_f)(void *priv_ctx,const uint8_t* data, uint16_t length);
 typedef TO_ret_t (TODRV_verify_hmac_final_f)(void *priv_ctx,const uint8_t hmac[TO_HMAC_SIZE]);
@@ -303,73 +309,59 @@ typedef TO_ret_t (TODRV_verify_cmac_f)(void *priv_ctx,const uint8_t key_index, c
 		const uint16_t data_length, const uint8_t cmac_data[TO_CMAC_SIZE]);
 #endif
 #if TODRV_API_CONFIG_SEC_MSG > 0
-typedef TO_ret_t (TODRV_aes128cbc_hmac_secure_message_f)(void *priv_ctx, const uint8_t aes_key_index,
-		const uint8_t hmac_key_index, const uint8_t* data, const uint16_t data_length,
-		uint8_t initial_vector[TO_INITIALVECTOR_SIZE], uint8_t* cryptogram, uint8_t hmac[TO_HMAC_SIZE]);
-typedef TO_ret_t (TODRV_aes128cbc_hmac_unsecure_message_f)(void *priv_ctx, const uint8_t aes_key_index,
-		const uint8_t hmac_key_index, const uint8_t initial_vector[TO_INITIALVECTOR_SIZE],
-		const uint8_t* cryptogram, const uint16_t cryptogram_length,
-		const uint8_t hmac[TO_HMAC_SIZE], uint8_t* data);
-typedef TO_ret_t (TODRV_aes128cbc_cmac_secure_message_f)(void *priv_ctx, const uint8_t aes_key_index,
-		const uint8_t cmac_key_index, const uint8_t* data, const uint16_t data_length,
-		uint8_t initial_vector[TO_INITIALVECTOR_SIZE], uint8_t* cryptogram, uint8_t cmac[TO_CMAC_SIZE]);
-typedef TO_ret_t (TODRV_aes128cbc_cmac_unsecure_message_f)(void *priv_ctx, const uint8_t aes_key_index,
-		const uint8_t cmac_key_index, const uint8_t initial_vector[TO_INITIALVECTOR_SIZE],
-		const uint8_t* cryptogram, const uint16_t cryptogram_length,
-		const uint8_t cmac[TO_CMAC_SIZE], uint8_t* data);
 typedef TO_ret_t (TODRV_secure_payload_f)(void *priv_ctx,const uint8_t key_index,
-		const TO_enc_alg_t enc_alg, const TO_mac_alg_t mac_alg,
-		const uint8_t* data, const uint16_t data_len,
-		uint8_t* payload, uint16_t* payload_len);
+		const TO_secmsg_alg_t alg,
+		const uint8_t *data, const uint16_t data_length,
+		uint8_t *payload, uint16_t *payload_length);
 typedef TO_ret_t (TODRV_secure_payload_init_f)(void *priv_ctx, const uint8_t key_index,
-		const TO_enc_alg_t enc_alg, const TO_mac_alg_t mac_alg,
-		const uint16_t data_len, uint8_t sequence[TO_SEQUENCE_SIZE],
-		uint8_t *iv, uint16_t *iv_len);
-typedef TO_ret_t (TODRV_secure_payload_update_f)(void *priv_ctx, const uint8_t* data,
-		const uint16_t data_len, uint8_t* cryptogram);
-typedef TO_ret_t (TODRV_secure_payload_final_f)(void *priv_ctx, const uint8_t* data, const uint16_t data_len,
-		uint8_t* cryptogram, uint16_t* cryptogram_len);
+		const TO_secmsg_alg_t alg,
+		const uint16_t data_length, uint8_t sequence[TO_SEQUENCE_SIZE],
+		uint8_t *iv, uint16_t *iv_length);
+typedef TO_ret_t (TODRV_secure_payload_update_f)(void *priv_ctx, const uint8_t *data,
+		const uint16_t data_length, uint8_t *cryptogram, uint16_t *cryptogram_len);
+typedef TO_ret_t (TODRV_secure_payload_final_f)(void *priv_ctx, const uint8_t *data, const uint16_t data_length,
+		uint8_t *cryptogram, uint16_t *cryptogram_length);
 typedef TO_ret_t (TODRV_unsecure_payload_f)(void *priv_ctx,const uint8_t key_index,
-		const TO_enc_alg_t enc_alg, const TO_mac_alg_t mac_alg,
-		const uint8_t* payload, const uint16_t payload_len,
-		uint8_t* data, uint16_t* data_len);
+		const TO_secmsg_alg_t alg,
+		const uint8_t *payload, const uint16_t payload_length,
+		uint8_t *data, uint16_t *data_length);
 typedef TO_ret_t (TODRV_unsecure_payload_init_cbc_f)(void *priv_ctx, const uint8_t key_index,
-		const TO_enc_alg_t enc_alg, const TO_mac_alg_t mac_alg,
-		const uint16_t cryptogram_len, const uint8_t sequence[TO_SEQUENCE_SIZE],
+		const TO_secmsg_alg_t alg,
+		const uint16_t cryptogram_length, const uint8_t sequence[TO_SEQUENCE_SIZE],
 		const uint8_t initial_vector[TO_INITIALVECTOR_SIZE],
 		const uint8_t last_block_iv[TO_INITIALVECTOR_SIZE],
 		const uint8_t last_block[TO_AES_BLOCK_SIZE]);
 typedef TO_ret_t (TODRV_unsecure_payload_init_aead_f)(void *priv_ctx, const uint8_t key_index,
-		const TO_enc_alg_t enc_alg, const TO_mac_alg_t mac_alg,
-		const uint16_t cryptogram_len,
+		const TO_secmsg_alg_t alg,
+		const uint16_t cryptogram_length,
 		const uint8_t sequence[TO_SEQUENCE_SIZE]);
-typedef TO_ret_t (TODRV_unsecure_payload_update_f)(void *priv_ctx, const uint8_t* cryptogram,
-		const uint16_t cryptogram_len, uint8_t* data, uint16_t* data_len);
+typedef TO_ret_t (TODRV_unsecure_payload_update_f)(void *priv_ctx, const uint8_t *cryptogram,
+		const uint16_t cryptogram_length, uint8_t *data, uint16_t *data_length);
 typedef TO_ret_t (TODRV_unsecure_payload_final_f)(void *priv_ctx);
 #endif
 #if TODRV_API_CONFIG_SIGNING > 0
 typedef TO_ret_t (TODRV_sign_f)(void *priv_ctx,const uint8_t key_index, const uint8_t* challenge,
-		const uint16_t challenge_length, uint8_t* signature);
+		const uint16_t challenge_length, uint8_t* signature, uint16_t* signature_length);
 typedef TO_ret_t (TODRV_verify_f)(void *priv_ctx,const uint8_t key_index, const uint8_t* data,
 		const uint16_t data_length, const uint8_t* signature);
 typedef TO_ret_t (TODRV_sign_hash_f)(void *priv_ctx,const uint8_t key_index,
-		const uint8_t hash[TO_HASH_SIZE], uint8_t* signature);
+		const uint8_t hash[TO_HASH_SIZE], uint8_t* signature, uint16_t* signature_length);
 typedef TO_ret_t (TODRV_verify_hash_signature_f)(void *priv_ctx,const uint8_t key_index,
 		const uint8_t hash[TO_HASH_SIZE], const uint8_t* signature);
 #endif
 #if TODRV_API_CONFIG_CERT_MGMT > 0
 typedef TO_ret_t (TODRV_get_certificate_subject_cn_f)(void *priv_ctx,const uint8_t certificate_index,
-		char subject_cn[TO_CERT_SUBJECT_CN_MAXSIZE + 1]);
+		char *subject_cn, uint16_t *subject_cn_length);
 typedef TO_ret_t (TODRV_set_certificate_signing_request_dn_f)(void *priv_ctx,const uint8_t certificate_index,
 		const uint8_t csr_dn[TO_CERT_DN_MAXSIZE], const uint16_t csr_dn_len);
 typedef TO_ret_t (TODRV_get_certificate_signing_request_f)(void *priv_ctx,const uint8_t certificate_index,
 		uint8_t* csr, uint16_t* size);
 typedef TO_ret_t (TODRV_get_certificate_f)(void *priv_ctx,const uint8_t certificate_index,
-		const TO_certificate_format_t format, uint8_t* certificate);
+		const TO_certificate_format_t format, uint8_t* certificate, uint16_t *certificate_length);
 typedef TO_ret_t (TODRV_get_certificate_x509_f)(void *priv_ctx,const uint8_t certificate_index,
 		uint8_t* certificate, uint16_t* size);
 typedef TO_ret_t (TODRV_set_certificate_x509_f)(void *priv_ctx,const uint8_t certificate_index,
-		const uint8_t* certificate, const uint16_t size);
+		const uint8_t* certificate, const uint16_t certificate_length);
 
 typedef TO_ret_t (TODRV_set_certificate_x509_init_f)(void *priv_ctx, const uint8_t certificate_index);
 typedef TO_ret_t (TODRV_set_certificate_x509_update_f)(void *priv_ctx,
@@ -379,10 +371,12 @@ typedef TO_ret_t (TODRV_set_certificate_x509_final_f)(void *priv_ctx);
 typedef TO_ret_t (TODRV_get_certificate_and_sign_f)(void *priv_ctx,const uint8_t certificate_index,
 		const TO_certificate_format_t format,
 		const uint8_t* challenge, const uint16_t challenge_length,
-		uint8_t* certificate, uint8_t* signature);
+		uint8_t* certificate, uint16_t *certificate_length, uint8_t* signature, uint16_t *signature_length);
+
 typedef TO_ret_t (TODRV_get_certificate_x509_and_sign_f)(void *priv_ctx,const uint8_t certificate_index,
 		const uint8_t* challenge, const uint16_t challenge_length,
-		uint8_t* certificate, uint16_t* size, uint8_t* signature);
+		uint8_t* certificate, uint16_t* certificate_len,
+		uint8_t* signature, uint16_t *signature_len);
 typedef TO_ret_t (TODRV_get_certificate_x509_init_f)(void *priv_ctx,
 		const uint8_t certificate_index);
 typedef TO_ret_t (TODRV_get_certificate_x509_update_f)(void *priv_ctx,
@@ -391,12 +385,12 @@ typedef TO_ret_t (TODRV_get_certificate_x509_final_f)(void *priv_ctx,
 		const uint8_t* challenge, const uint16_t challenge_length,
 		uint8_t* signature);
 typedef TO_ret_t (TODRV_verify_certificate_and_store_f)(void *priv_ctx,const uint8_t ca_key_id,
-		const TO_certificate_format_t format, const uint8_t* certificate);
+		const TO_certificate_format_t format, const uint8_t* certificate, const uint16_t certificate_length);
 typedef TO_ret_t (TODRV_verify_ca_certificate_and_store_f)(void *priv_ctx,const uint8_t ca_key_index,
 		const uint8_t subca_key_index, const uint8_t *certificate,
 		const uint16_t certificate_len);
 typedef TO_ret_t (TODRV_get_challenge_and_store_f)(void *priv_ctx,
-		uint8_t challenge[TO_CHALLENGE_SIZE]);
+		uint8_t *challenge, uint16_t *challenge_length);
 typedef TO_ret_t (TODRV_verify_challenge_signature_f)(void *priv_ctx,
 		const uint8_t signature[TO_SIGNATURE_SIZE]);
 typedef TO_ret_t (TODRV_verify_chain_certificate_and_store_init_f)(void *priv_ctx,
@@ -432,8 +426,7 @@ typedef TO_ret_t (TODRV_get_tls_random_and_store_f)(void *priv_ctx,
 typedef TO_ret_t (TODRV_get_tls_master_secret_f)(void *priv_ctx,
 		uint8_t master_secret[TO_TLS_MASTER_SECRET_SIZE]);
 typedef TO_ret_t (TODRV_get_tls_master_secret_derived_keys_f)(void *priv_ctx,
-		uint8_t key_block_length,
-		uint8_t key_block[]);
+		uint8_t *key_block, uint8_t *key_block_length);
 typedef TO_ret_t (TODRV_renew_tls_keys_ecdhe_f)(void *priv_ctx,const uint8_t kpriv_index,
 		const uint8_t kpub_index, const uint8_t enc_key_index,
 		const uint8_t dec_key_index);
@@ -451,7 +444,7 @@ typedef TO_ret_t (TODRV_tls_get_client_hello_f)(void *priv_ctx,
 		uint8_t *client_hello, uint16_t *client_hello_len);
 typedef TO_ret_t (TODRV_tls_get_client_hello_ext_f)(void *priv_ctx,
 		const uint8_t timestamp[TO_TIMESTAMP_SIZE],
-		const uint8_t *ext_data, uint8_t ext_length,
+		const uint8_t *ext_data, uint16_t ext_length,
 		uint8_t *client_hello, uint16_t *client_hello_len);
 typedef TO_ret_t (TODRV_tls_get_client_hello_init_f)(void *priv_ctx,
 		const uint8_t timestamp[TO_TIMESTAMP_SIZE],
@@ -463,9 +456,9 @@ typedef TO_ret_t (TODRV_tls_get_client_hello_final_f)(void *priv_ctx,
 		uint8_t *data);
 typedef TO_ret_t (TODRV_tls_handle_hello_verify_request_f)(void *priv_ctx,
 		const uint8_t *hello_verify_request,
-		const uint32_t hello_verify_request_len);
+		const uint16_t hello_verify_request_len);
 typedef TO_ret_t (TODRV_tls_handle_server_hello_f)(void *priv_ctx,const uint8_t *server_hello,
-		const uint32_t server_hello_len);
+		const uint16_t server_hello_len);
 typedef TO_ret_t (TODRV_tls_handle_server_hello_init_f)(void *priv_ctx,
 		const uint16_t server_hello_len);
 typedef TO_ret_t (TODRV_tls_handle_server_hello_update_f)(void *priv_ctx,
@@ -474,31 +467,31 @@ typedef TO_ret_t (TODRV_tls_handle_server_hello_final_f)(void *priv_ctx,
 		const uint8_t *data, const uint16_t final_len);
 typedef TO_ret_t (TODRV_tls_handle_server_certificate_f)(void *priv_ctx,
 		const uint8_t *server_certificate,
-		const uint32_t server_certificate_len);
+		const uint16_t server_certificate_len);
 typedef TO_ret_t (TODRV_tls_handle_server_certificate_init_f)(void *priv_ctx,
 		const uint8_t *server_certificate_init,
-		const uint32_t server_certificate_init_len);
+		const uint16_t server_certificate_init_len);
 typedef TO_ret_t (TODRV_tls_handle_server_certificate_update_f)(void *priv_ctx,
 		const uint8_t *server_certificate,
-		const uint32_t server_certificate_len);
+		const uint16_t server_certificate_len);
 typedef TO_ret_t (TODRV_tls_handle_server_certificate_final_f)(void *priv_ctx);
 typedef TO_ret_t (TODRV_tls_handle_server_key_exchange_f)(void *priv_ctx,const uint8_t *server_key_exchange,
-		const uint32_t server_key_exchange_len);
+		const uint16_t server_key_exchange_len);
 typedef TO_ret_t (TODRV_tls_handle_server_key_exchange_init_f)(void *priv_ctx,
 		const uint8_t *server_key_exchange_init,
-		const uint32_t server_key_exchange_init_len);
+		const uint16_t server_key_exchange_init_len);
 typedef TO_ret_t (TODRV_tls_handle_server_key_exchange_update_f)(void *priv_ctx,
 		const uint8_t *server_key_exchange,
-		const uint32_t server_key_exchange_len);
+		const uint16_t server_key_exchange_len);
 typedef TO_ret_t (TODRV_tls_handle_server_key_exchange_final_f)(void *priv_ctx);
 typedef TO_ret_t (TODRV_tls_handle_certificate_request_f)(void *priv_ctx,const uint8_t *certificate_request,
-		const uint32_t certificate_request_len);
+		const uint16_t certificate_request_len);
 typedef TO_ret_t (TODRV_tls_handle_server_hello_done_f)(void *priv_ctx,
 		const uint8_t *server_hello_done,
-		const uint32_t server_hello_done_len);
+		const uint16_t server_hello_done_len);
 typedef TO_ret_t (TODRV_tls_handle_mediator_certificate_f)(void *priv_ctx,
 		const uint8_t *mediator_certificate,
-		const uint32_t mediator_certificate_len);
+		const uint16_t mediator_certificate_len);
 typedef TO_ret_t (TODRV_tls_get_certificate_f)(void *priv_ctx,
 		uint8_t *certificate, uint16_t *certificate_len);
 typedef TO_ret_t (TODRV_tls_get_certificate_init_f)(void *priv_ctx,
@@ -521,10 +514,10 @@ typedef TO_ret_t (TODRV_tls_get_finished_f)(void *priv_ctx,
 		uint16_t *finished_len);
 typedef TO_ret_t (TODRV_tls_handle_change_cipher_spec_f)(void *priv_ctx,
 		const uint8_t *change_cipher_spec,
-		const uint32_t change_cipher_spec_len);
+		const uint16_t change_cipher_spec_len);
 typedef TO_ret_t (TODRV_tls_handle_finished_f)(void *priv_ctx,
 		const uint8_t *finished,
-		const uint32_t finished_len);
+		const uint16_t finished_len);
 typedef TO_ret_t (TODRV_tls_get_certificate_slot_f)(void *priv_ctx,
 		uint8_t *slot);
 typedef TO_ret_t (TODRV_tls_secure_payload_f)(void *priv_ctx,
@@ -538,7 +531,7 @@ typedef TO_ret_t (TODRV_tls_secure_payload_init_aead_f)(void *priv_ctx,
 		const uint8_t *header, const uint16_t header_len,
 		uint8_t initial_vector[TO_TLS_AEAD_EXPLICIT_NONCE_SIZE]);
 typedef TO_ret_t (TODRV_tls_secure_payload_update_f)(void *priv_ctx,const uint8_t* data,
-		const uint16_t data_len, uint8_t *cryptogram);
+		const uint16_t data_len, uint8_t *cryptogram, uint16_t *cryptogram_len);
 typedef TO_ret_t (TODRV_tls_secure_payload_final_f)(void *priv_ctx,const uint8_t* data, const uint16_t data_len,
 		uint8_t *cryptogram, uint16_t *cryptogram_len);
 typedef TO_ret_t (TODRV_tls_unsecure_payload_f)(void *priv_ctx,
@@ -614,7 +607,7 @@ typedef TO_ret_t (TODRV_get_status_PIO_config_f)(void *priv_ctx, int *enable,
 #endif
 typedef TO_ret_t (TODRV_flush_f)(void *priv_ctx);
 #if TODRV_API_CONFIG_RANDOM > 0
-typedef TO_ret_t (TODRV_get_random_f)(void *priv_ctx,const uint16_t random_length, uint8_t* random);
+typedef TO_ret_t (TODRV_get_random_f)(void *priv_ctx, uint8_t* random, const uint16_t random_length);
 #endif
 #if TODRV_API_CONFIG_LOADER > 0
 typedef TO_ret_t (TODRV_loader_broadcast_get_info_f)(
@@ -746,10 +739,6 @@ typedef struct TODRV_api_cmac_s {
 #endif
 #if TODRV_API_CONFIG_SEC_MSG > 0
 typedef struct TODRV_api_sec_msg_s {
-	TODRV_aes128cbc_hmac_secure_message_f *aes128cbc_hmac_secure_message;
-	TODRV_aes128cbc_hmac_unsecure_message_f *aes128cbc_hmac_unsecure_message;
-	TODRV_aes128cbc_cmac_secure_message_f *aes128cbc_cmac_secure_message;
-	TODRV_aes128cbc_cmac_unsecure_message_f *aes128cbc_cmac_unsecure_message;
 	TODRV_secure_payload_f *secure_payload;
 	TODRV_secure_payload_init_f *secure_payload_init;
 	TODRV_secure_payload_update_f *secure_payload_update;

@@ -30,9 +30,9 @@ void print_log_function(const TO_log_level_t level, const char * log)
 
 int main(void)
 {
+#ifdef TODRV_SSE_ENABLE_SELF_TESTS
 	TO_lib_ret_t ret;
 
-#ifdef TODRV_SSE_ENABLE_SELF_TESTS
 	// This NVM self-tests is using the NVM.
 	// It should only be run for setting-up the nvm load and store
 	// functions. Once those are functionnal, this self test is of no use.

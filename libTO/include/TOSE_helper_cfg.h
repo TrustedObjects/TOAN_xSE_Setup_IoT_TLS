@@ -35,7 +35,7 @@
 
 #ifndef TO_DISABLE_ECIES_HELPER
 /* disable ECIES helper */
-#define TO_DISABLE_ECIES_HELPER 1
+/* #undef TO_DISABLE_ECIES_HELPER */
 #endif
 
 #ifndef TO_DISABLE_SECURE_PAYLOAD_HELPER

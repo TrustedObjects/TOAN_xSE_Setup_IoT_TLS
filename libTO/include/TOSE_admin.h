@@ -29,11 +29,16 @@ extern "C" {
 /**
  * @brief Initialize administration session.
  * @param[in] ctx Pointer to the SE context
- * @param[in] server_challenge Server challenge, coming from the server
+ * @param[in] server_challenge Server challenge, obtained from the server.
+ * This buffer expected to be TO_ADMIN_CHALLENGE_SIZE bytes long.
  * @param[out] se_challenge Returned Secure Element challenge
+ * This buffer must be pre-allocated to receive TO_ADMIN_CHALLENGE_SIZE bytes long.
  * @param[out] se_cryptogram Returned Secure Element cryptogram
+ * This buffer must be pre-allocated to receive TO_ADMIN_CRYPTOGRAM_SIZE bytes long.
  * @param[out] diversification_data Returned diversification data
+ * This buffer must be pre-allocated to receive TO_ADMIN_DIVERS_DATA_SIZE bytes long.
  * @param[out] protocol_info Returned protocol info
+ * This buffer must be pre-allocated to receive TO_ADMIN_PROTO_INFO_SIZE bytes long.
  *
  * This function initializes a new administration session between a server and
  * the Secure Element.
@@ -57,12 +62,15 @@ extern TO_ret_t TOSE_admin_session_init(TOSE_ctx_t *ctx,
 /**
  * @brief Activate administration session by authenticating server.
  * @param[in] ctx Pointer to the SE context
- * @param[in] options Administration session options
- * @param[in] server_cryptogram Server cryptogram, coming from the server
- * @param[in] mac MAC computed on options and server cryptogram
+ * @param[in] options Administration session options.
+ * This buffer expected to be TO_ADMIN_OPTIONS_SIZE bytes long.
+ * @param[in] server_cryptogram Server cryptogram, obtained from the server.
+ * This buffer expected to be TO_ADMIN_CRYPTOGRAM_SIZE bytes long.
+ * @param[in] mac MAC computed on options and server cryptogram.
+ * This buffer expected to be TO_ADMIN_MAC_SIZE bytes long.
  *
  * This function allows the server to authenticate against the Secure Element,
- * in order to activate authentication session.
+ * once successfully authenticated, the admin session can start.
  *
  * @cond libTO
  * @return
@@ -88,7 +96,8 @@ extern TO_ret_t TOSE_admin_session_auth_server(TOSE_ctx_t *ctx,
  * Once decrypted, those contain :
  *   - N-16 bytes of command, encrypted with KENC (using the following IV and AES-CBC)
  *   - 16 bytes of IV, used for the second layer of encryption
- * @param[in] length Expresses the length of the Command, excluding the 8 bytes of CMAC at the start
+ * @param[in] length Expresses the effective length of the Command,
+ * excluding the 8 bytes of CMAC at the start.
  *
  * @cond libTO
  * @details The command is expected to be secure (encryption, MAC) according to the pre-defined administration protocol.
@@ -101,13 +110,15 @@ extern TO_ret_t TOSE_admin_session_auth_server(TOSE_ctx_t *ctx,
  * - TO_ERROR: generic error
  * @endcond
  */
-extern TO_ret_t TOSE_admin_command(TOSE_ctx_t *ctx, const uint8_t *command, uint16_t length);
+extern TO_ret_t TOSE_admin_command(TOSE_ctx_t *ctx,
+		const uint8_t *command,
+		uint16_t length);
 
 /**
  * @brief Administration command with response data.
  * @param[in] ctx Pointer to the SE context
- * @param[in] command The command
- * @param[in] length The command length
+ * @param[in] command The command to be executed an receive a response from.
+ * @param[in] length The command length.
  * @param[out] response Buffer to store response
  * @param[in] response_length Expected response length
  * @cond libTO
@@ -124,8 +135,11 @@ extern TO_ret_t TOSE_admin_command(TOSE_ctx_t *ctx, const uint8_t *command, uint
  * @deprecated This function is deprecated and may disappear in future releases, use TOSE_admin_command_with_response2() instead.
 
  */
-extern TO_ret_t TOSE_admin_command_with_response(TOSE_ctx_t *ctx, const uint8_t *command, uint16_t length,
-		uint8_t *response, uint16_t response_length);
+extern TO_ret_t TOSE_admin_command_with_response(TOSE_ctx_t *ctx,
+		const uint8_t *command,
+		uint16_t length,
+		uint8_t *response,
+		uint16_t response_length);
 
 /**
  * @brief Administration command with response data with variable length.
@@ -153,6 +167,8 @@ extern TO_ret_t TOSE_admin_command_with_response2(TOSE_ctx_t *ctx, const uint8_t
  * @brief Terminates administration session.
  * @param[in] ctx Pointer to the SE context
  * @param[out] mac The session MAC returned by the Secure Element
+ * This buffer must be pre-allocated to receive TO_ADMIN_MAC_SIZE bytes long.
+ *
  * @cond libTO
  * @return
  * - TORSP_SUCCESS on success
@@ -162,12 +178,14 @@ extern TO_ret_t TOSE_admin_command_with_response2(TOSE_ctx_t *ctx, const uint8_t
  * - TO_ERROR: generic error
  * @endcond
  */
-extern TO_ret_t TOSE_admin_session_fini(TOSE_ctx_t *ctx, uint8_t mac[TO_ADMIN_MAC_SIZE]);
+extern TO_ret_t TOSE_admin_session_fini(TOSE_ctx_t *ctx,
+		uint8_t mac[TO_ADMIN_MAC_SIZE]);
 
 /**
  * @brief Set administration slot to use from now on.
  * @param[in] ctx Pointer to the SE context
  * @param[in] index Admin slot index
+ *
  * @cond libTO
  * @return
  * - TORSP_SUCCESS on success
@@ -177,7 +195,8 @@ extern TO_ret_t TOSE_admin_session_fini(TOSE_ctx_t *ctx, uint8_t mac[TO_ADMIN_MA
  * - TO_ERROR: generic error
  * @endcond
  */
-extern TO_ret_t TOSE_admin_set_slot(TOSE_ctx_t *ctx, const uint8_t index);
+extern TO_ret_t TOSE_admin_set_slot(TOSE_ctx_t *ctx,
+		const uint8_t index);
 
 /** @} */
 

@@ -53,7 +53,7 @@ TO_lib_ret_t TOSE_helper_tls_secure_payload_cbc(TOSE_ctx_t *ctx,
 		uint8_t *cryptogram, uint16_t *cryptogram_len)
 {
 	uint32_t offset = 0;
-	uint16_t len;
+	uint16_t len, olen;
 	TO_ret_t ret;
 
 	*cryptogram_len = 0;
@@ -66,7 +66,8 @@ TO_lib_ret_t TOSE_helper_tls_secure_payload_cbc(TOSE_ctx_t *ctx,
 	while (data_len - offset >= TO_AES_BLOCK_SIZE) {
 		len = MIN(TLS_CAPI_MAX_UPDATE_SIZE, data_len - offset);
 		len -= len % TO_AES_BLOCK_SIZE;
-		ret = TOSE_tls_secure_payload_update(ctx, data + offset, len, cryptogram + offset);
+		olen = len;
+		ret = TOSE_tls_secure_payload_update(ctx, data + offset, len, cryptogram + offset, &olen);
 		if (ret != TORSP_SUCCESS) {
 			return TO_ERROR | ret;
 		}
@@ -93,7 +94,7 @@ TO_lib_ret_t TOSE_helper_tls_secure_payload_aead(TOSE_ctx_t *ctx,
 		uint8_t *cryptogram, uint16_t *cryptogram_len)
 {
 	uint32_t offset = 0;
-	uint16_t len;
+	uint16_t len, olen;
 	TO_ret_t ret;
 
 	*cryptogram_len = 0;
@@ -106,7 +107,8 @@ TO_lib_ret_t TOSE_helper_tls_secure_payload_aead(TOSE_ctx_t *ctx,
 	while (data_len - offset >= TO_AES_BLOCK_SIZE) {
 		len = MIN(TLS_CAPI_MAX_UPDATE_SIZE, data_len - offset);
 		len -= len % TO_AES_BLOCK_SIZE;
-		ret = TOSE_tls_secure_payload_update(ctx, data + offset, len, cryptogram + offset);
+		olen = len;
+		ret = TOSE_tls_secure_payload_update(ctx, data + offset, len, cryptogram + offset, &olen);
 		if (ret != TORSP_SUCCESS) {
 			return TO_ERROR | ret;
 		}
@@ -124,7 +126,6 @@ TO_lib_ret_t TOSE_helper_tls_secure_payload_aead(TOSE_ctx_t *ctx,
 	return TO_OK;
 }
 #endif
-
 
 #ifndef TO_DISABLE_API_HELPER_TLS_UNSECURE_PAYLOAD_CBC
 TO_lib_ret_t TOSE_helper_tls_unsecure_payload_cbc(TOSE_ctx_t *ctx,
@@ -213,7 +214,6 @@ TO_lib_ret_t TOSE_helper_tls_unsecure_payload_aead(TOSE_ctx_t *ctx,
 #endif
 
 #ifndef TO_DISABLE_TLS_STACK
-
 TO_lib_ret_t TOSE_helper_tls_get_client_hello_ext(TOSE_ctx_t *ctx,
 		const uint8_t timestamp[TO_TIMESTAMP_SIZE],
 		const uint8_t *ext_data, uint16_t ext_length,
@@ -275,8 +275,9 @@ TO_lib_ret_t TOSE_helper_tls_handle_server_hello(TOSE_ctx_t *ctx,
 }
 
 #ifndef TO_DISABLE_API_HELPER_TLS_HANDLE_SERVER_CERTIFICATE
-TO_lib_ret_t TOSE_helper_tls_handle_server_certificate(TOSE_ctx_t *ctx, const uint8_t *server_certificate,
-		const uint32_t server_certificate_len)
+TO_lib_ret_t TOSE_helper_tls_handle_server_certificate(TOSE_ctx_t *ctx,
+		const uint8_t *server_certificate,
+		const uint16_t server_certificate_len)
 {
 	uint32_t offset = 0;
 	TO_ret_t ret;
@@ -306,10 +307,10 @@ TO_lib_ret_t TOSE_helper_tls_handle_server_certificate(TOSE_ctx_t *ctx, const ui
 }
 #endif
 
-
 #ifndef TO_DISABLE_API_HELPER_TLS_HANDLE_SERVER_KEY_EXCHANGE
-TO_lib_ret_t TOSE_helper_tls_handle_server_key_exchange(TOSE_ctx_t *ctx, const uint8_t *server_key_exchange,
-		const uint32_t server_key_exchange_len)
+TO_lib_ret_t TOSE_helper_tls_handle_server_key_exchange(TOSE_ctx_t *ctx,
+		const uint8_t *server_key_exchange,
+		const uint16_t server_key_exchange_len)
 {
 	uint32_t offset = 0;
 	TO_ret_t ret;
@@ -340,7 +341,8 @@ TO_lib_ret_t TOSE_helper_tls_handle_server_key_exchange(TOSE_ctx_t *ctx, const u
 #endif
 
 #ifndef TO_DISABLE_API_HELPER_TLS_GET_CERTIFICATE
-TO_lib_ret_t TOSE_helper_tls_get_certificate(TOSE_ctx_t *ctx, uint8_t *certificate,
+TO_lib_ret_t TOSE_helper_tls_get_certificate(TOSE_ctx_t *ctx,
+		uint8_t *certificate,
 		uint16_t *certificate_len)
 {
 	uint16_t offset = 0;
@@ -457,7 +459,7 @@ typedef enum _tls_alert_desc_e {
 struct record {
 	uint16_t header_length; /**<header length */
 	uint16_t length; /**< content length,
-				0 if the header is not entirerely received */
+				0 if the header is not entirely received */
 	uint16_t offset; /**< content offset of data consumed by the upper layer */
 	uint8_t type; /**< type of record (Application, Handshake, Alert, CipherSpecChange, etc.) */
 	uint8_t *fragment; /**< content data,
@@ -471,7 +473,7 @@ struct TOSE_helper_tls_ctx_s {
 	uint8_t index;
 	uint8_t in_use;
 	uint8_t *pbuf;
-	uint8_t rx;
+	uint8_t rx;	/**< Indicates we are in reception mode */
 	uint32_t flight_offset;
 #if defined(TO_ENABLE_DTLS) && !defined(TO_DISABLE_DTLS_RETRANSMISSION)
 	uint8_t flight_buf[TOSE_HELPER_TLS_FLIGHT_BUFFER_SIZE];
@@ -912,6 +914,7 @@ static TO_lib_ret_t tls_send_record(TOSE_helper_tls_ctx_t *tls_ctx,
 	if (tls_ctx->encryption) {
 		TO_LOG_DBG("Send record content:",0);
 		TO_LOG_DBG_BUF(data, len);
+		record_content_len = TOSE_HELPER_TLS_IO_BUFFER_SIZE - hdr_len;
 		ret = tls_ctx->secure_record(tls_ctx->cipher_ctx, hdr, hdr_len,
 				data, len, &record_content, &record_content_len);
 	} else {
@@ -944,11 +947,9 @@ static TO_lib_ret_t tls_send_record(TOSE_helper_tls_ctx_t *tls_ctx,
  * @param[in] desc raison of the alert
  * @return TO_OK if the alert has been sent to the peer
  * */
-static TO_lib_ret_t tls_alert(
-		TOSE_helper_tls_ctx_t *tls_ctx,
+static TO_lib_ret_t tls_alert(TOSE_helper_tls_ctx_t *tls_ctx,
 		tls_alert_level_t level,
-		tls_alert_desc_t desc
-)
+		tls_alert_desc_t desc)
 {
 	TO_lib_ret_t ret = TO_OK;
 	uint8_t msg[TLS_FLIGHT_HEADER_SIZE+2] = {
@@ -995,12 +996,15 @@ static TO_ret_t internal_unsecure_record(void *ctx,
 	uint16_t out_offset = 0;
 	uint16_t olen = *olength;
 	uint8_t *in = input;
-	uint8_t *out = input + header_length; /* plain text output is decipered in place on cipherd input */
+	uint8_t *out = input + header_length; /* plain text output is deciphered in place on ciphered input */
 
+	olen = ilength;
 	if ((ret = TOSE_tls_set_session(tls_ctx->ctx, tls_ctx->index)) != TORSP_SUCCESS) {
 		return TO_ERROR | ret;
 	}
-#ifdef TO_DISABLE_CAPI
+
+// The CAPI does not exists in the SSE for the secure/unsecure payload
+#if defined(TO_DISABLE_CAPI) || defined(TOSE_DRIVER_SSE)
 	ret = TOSE_tls_unsecure_payload(tls_ctx->ctx,
 				in, header_length,
 				in + header_length, ilength - header_length,
@@ -1087,7 +1091,8 @@ static TO_ret_t internal_secure_record(void *ctx,
 		return TO_ERROR | ret;
 	}
 
-#ifdef TO_DISABLE_CAPI
+// The CAPI does not exists in the SSE for the secure/unsecure payload
+#if defined(TO_DISABLE_CAPI) || defined(TOSE_DRIVER_SSE)
 	ret = TOSE_tls_secure_payload(tls_ctx->ctx,
 			header, header_length,
 			input, ilength,
@@ -1098,6 +1103,7 @@ static TO_ret_t internal_secure_record(void *ctx,
 #else /* CAPI ENABLED */
 	uint8_t *out = *output;
 	uint16_t offset;
+	uint16_t olen;
 	/* INIT */
 	if (tls_ctx->encryption_type == TO_TLS_ENCRYPTION_AES_CBC) {
 		/* CBC */
@@ -1116,8 +1122,9 @@ static TO_ret_t internal_secure_record(void *ctx,
 	/* UPDATE */
 	for (offset = 0; (offset + TLS_CIPHER_UPDATE_SIZE) < ilength;
 			offset += TLS_CIPHER_UPDATE_SIZE) {
+		olen = TLS_CIPHER_UPDATE_SIZE;
 		ret = TOSE_tls_secure_payload_update(tls_ctx->ctx, input + offset,
-				TLS_CIPHER_UPDATE_SIZE, out + offset);
+				TLS_CIPHER_UPDATE_SIZE, out + offset, &olen);
 		if (ret != TORSP_SUCCESS) {
 			return TO_ERROR | ret;
 		}
@@ -1126,15 +1133,16 @@ static TO_ret_t internal_secure_record(void *ctx,
 	/* FINAL */
 	uint16_t last_length = (ilength - offset) & ~(TO_AES_BLOCK_SIZE - 1);
 	if (last_length) {
+		olen = last_length;
 		ret = TOSE_tls_secure_payload_update(tls_ctx->ctx, input + offset,
-				last_length, out + offset);
+				last_length, out + offset, &olen);
 		offset += last_length;
 		if (ret != TORSP_SUCCESS) {
 			return TO_ERROR | ret;
 		}
 	}
 	last_length = ilength - offset;
-	uint16_t olen;
+	olen = last_length;
 	ret = TOSE_tls_secure_payload_final(tls_ctx->ctx, input + offset,
 			last_length, out + offset, &olen);
 	if (ret != TORSP_SUCCESS) {
@@ -1267,7 +1275,7 @@ static TO_lib_ret_t setup_cipher_ctx(TOSE_helper_tls_ctx_t *tls_ctx)
 
 	/* fill the upper layer's buffer with derived keys */
 	if ((ret = TOSE_get_tls_master_secret_derived_keys(tls_ctx->ctx,
-			key_block_length, key_block) != TORSP_SUCCESS)) {
+			key_block, &key_block_length) != TORSP_SUCCESS)) {
 		TO_LOG_ERR("Failed to retrieve derived keys from the Secure Element - ret %x",
 				(unsigned) ret);
 		return TO_ERROR;
@@ -1279,7 +1287,7 @@ static TO_lib_ret_t setup_cipher_ctx(TOSE_helper_tls_ctx_t *tls_ctx)
  * @brief decrypt a ciphered record
  *
  * @param[in,out] tls_ctx tls context, the internal buffer is
- * updated with the data decipered
+ * updated with the data deciphered
  *
  * @retval TO_OK record is decrypted and authenticated
  * @retval TO_ERROR record failed to be decrypted or authenticated
@@ -2212,6 +2220,7 @@ static TO_lib_ret_t tls_receive_handshake_message(TOSE_helper_tls_ctx_t *tls_ctx
 
 	/* update context and len */
 	tls_ctx->pbuf = pbuf;
+
 	tls_ctx->rx_rec.offset += msg_len;
 	*len = msg_len;
 
@@ -2272,12 +2281,13 @@ TO_lib_ret_t TOSE_helper_tls_do_handshake_step(
 )
 {
 	uint32_t len = 0;
-	uint16_t len16;
+	uint16_t len16 = 0;
 	TO_ret_t ret;
 	TO_lib_ret_t ret_lib = TO_OK;
 	uint8_t timestamp[TO_TIMESTAMP_SIZE] = { 0x00, 0x00, 0x00, 0x00 };
 	TO_tls_record_type_t type = TO_TLS_RECORD_TYPE_HANDSHAKE;
 	uint8_t next_rx = tls_ctx->rx;
+	uint8_t *p;
 
 	if (tls_ctx->rx) {
 
@@ -2324,27 +2334,28 @@ TO_lib_ret_t TOSE_helper_tls_do_handshake_step(
 			return TO_ERROR;
 		}
 
-		if ((tls_ctx->cipher_suite_type == TO_TLS_CIPHER_SUITE_ECDHE)
-		 && (tls_ctx->state == TO_TLS_STATE_SERVER_CERTIFICATE_REQUEST)
-		 && (*tls_ctx->pbuf == TO_TLS_HANDSHAKE_TYPE_SERVER_HELLO_DONE)) {
+		if ((tls_ctx->cipher_suite_type == TO_TLS_CIPHER_SUITE_ECDHE) &&
+				(tls_ctx->state == TO_TLS_STATE_SERVER_CERTIFICATE_REQUEST) &&
+				(*tls_ctx->pbuf == TO_TLS_HANDSHAKE_TYPE_SERVER_HELLO_DONE)) {
 			TO_LOG_INF("Client authentication not requested\n",0);
 			tls_ctx->state = TO_TLS_STATE_SERVER_HELLO_DONE;
-		} else if ((tls_ctx->cipher_suite_type == TO_TLS_CIPHER_SUITE_PSK)
-		 && (tls_ctx->state == TO_TLS_STATE_SERVER_KEY_EXCHANGE)
-		 && (*tls_ctx->pbuf == TO_TLS_HANDSHAKE_TYPE_SERVER_HELLO_DONE)) {
+		} else if ((tls_ctx->cipher_suite_type == TO_TLS_CIPHER_SUITE_PSK) &&
+				(tls_ctx->state == TO_TLS_STATE_SERVER_KEY_EXCHANGE) &&
+				(*tls_ctx->pbuf == TO_TLS_HANDSHAKE_TYPE_SERVER_HELLO_DONE)) {
 			TO_LOG_INF("Server key exchange skipped\n",0);
 			tls_ctx->state = TO_TLS_STATE_SERVER_HELLO_DONE;
 		}
 #ifdef TO_ENABLE_DTLS
-		else if ((tls_ctx->state == TO_TLS_STATE_SERVER_HELLO_VERIFY_REQUEST)
-		 && (*tls_ctx->pbuf == TO_TLS_HANDSHAKE_TYPE_SERVER_HELLO)
-		 && (tls_ctx->client_session_id_len > 0)) {
+		else if ((tls_ctx->state == TO_TLS_STATE_SERVER_HELLO_VERIFY_REQUEST) &&
+				(*tls_ctx->pbuf == TO_TLS_HANDSHAKE_TYPE_SERVER_HELLO) &&
+				(tls_ctx->client_session_id_len > 0)) {
+
 			/* DTLS session resumption, no cookie exchange */
 			TO_LOG_INF("Cookie exchange skipped\n",0);
 			tls_ctx->state = TO_TLS_STATE_SERVER_HELLO;
 		}
 
-		uint8_t msg_type = tls_ctx->rxbuf[_TLS_HEADER_SIZE];
+		msg_type = tls_ctx->rxbuf[_TLS_HEADER_SIZE];
 
 		/**
 		 * Detect replayed flight by checking handshake message type.
@@ -2352,12 +2363,13 @@ TO_lib_ret_t TOSE_helper_tls_do_handshake_step(
 		 * retransmitted to query last client flight as it is the last
 		 * server flight.
 		 */
-		if (type == TO_TLS_RECORD_TYPE_HANDSHAKE && msg_type != (tls_ctx->state & 0xff)) {
+		if ((type == TO_TLS_RECORD_TYPE_HANDSHAKE) &&
+				(msg_type != (tls_ctx->state & 0xff))) {
 #ifndef TO_DISABLE_DTLS_RETRANSMISSION
 			/* Ignore in-flight messages, wait last or missing */
-			if ((msg_type != TO_TLS_HANDSHAKE_TYPE_HELLO_VERIFY_REQUEST)
-			 && (msg_type != TO_TLS_HANDSHAKE_TYPE_SERVER_HELLO_DONE)
-			 && (msg_type != TO_TLS_HANDSHAKE_TYPE_FINISHED)) {
+			if ((msg_type != TO_TLS_HANDSHAKE_TYPE_HELLO_VERIFY_REQUEST) &&
+					(msg_type != TO_TLS_HANDSHAKE_TYPE_SERVER_HELLO_DONE) &&
+					(msg_type != TO_TLS_HANDSHAKE_TYPE_FINISHED)) {
 				TO_LOG_INF("Ignored in-flight handshake message type %02x\n", msg_type);
 			} else {
 				/* Retransmit last flight */
@@ -2377,6 +2389,7 @@ TO_lib_ret_t TOSE_helper_tls_do_handshake_step(
 			TO_LOG_WRN("Failed to set TLS session, trying to continue as it is first session",0);
 		} else {
 			TO_LOG_ERR("Failed to set TLS session",0);
+
 			return TO_ERROR | ret;
 		}
 	}
@@ -2395,24 +2408,39 @@ TO_lib_ret_t TOSE_helper_tls_do_handshake_step(
 			FALL_THROUGH
 		case TO_TLS_STATE_CLIENT_HELLO:
 			TO_LOG_INF("SNI len : %d ",tls_ctx->sni_length);
+
+			// In TLS, the buffer is made this way
+			len16 = TOSE_HELPER_TLS_IO_BUFFER_SIZE - TLS_FLIGHT_HEADER_SIZE - _TLS_HEADER_SIZE;
 			ret = TOSE_tls_get_client_hello_ext(tls_ctx->ctx,
-					timestamp, tls_ctx->sni, tls_ctx->sni_length,
-					tls_ctx->pbuf + TLS_FLIGHT_HEADER_SIZE, &len16);
+					timestamp,
+					tls_ctx->sni,
+					tls_ctx->sni_length,
+					tls_ctx->pbuf + TLS_FLIGHT_HEADER_SIZE,
+					&len16);
 			if (ret == TORSP_UNKNOWN_CMD) {
+
 				/* fallback to previous version */
-				ret = TOSE_tls_get_client_hello(tls_ctx->ctx, timestamp,
-						tls_ctx->pbuf + TLS_FLIGHT_HEADER_SIZE, &len16);
+				ret = TOSE_tls_get_client_hello(tls_ctx->ctx,
+						timestamp,
+						tls_ctx->pbuf + TLS_FLIGHT_HEADER_SIZE,
+						&len16);
+				if (ret != TORSP_SUCCESS) {
+					TO_LOG_ERR("Unexpected error met calling TOSE_tls_get_client_hello => 0x%X.", ret);
+
+					break;
+				}
+			} else {
+				if (ret != TORSP_SUCCESS) {
+					TO_LOG_ERR("Unexpected error met calling TOSE_tls_get_client_hello_ext => 0x%X.", ret);
+
+					break;
+				}
 			}
-			if (ret != TORSP_SUCCESS) {
-				break;
-			}
-			{
-				uint8_t *p = tls_ctx->pbuf + TLS_FLIGHT_HEADER_SIZE + _TLS_HANDSHAKE_HEADER_SIZE + 2 * sizeof(uint8_t) + TO_TLS_RANDOM_SIZE;
-				/* Save client session ID */
-				tls_ctx->client_session_id_len = *(p++);
-				TO_secure_memcpy(tls_ctx->client_session_id, p, tls_ctx->client_session_id_len);
-				p += tls_ctx->client_session_id_len;
-			}
+			p = tls_ctx->pbuf + TLS_FLIGHT_HEADER_SIZE + _TLS_HANDSHAKE_HEADER_SIZE + 2 * sizeof(uint8_t) + TO_TLS_RANDOM_SIZE;
+			/* Save client session ID */
+			tls_ctx->client_session_id_len = *(p++);
+			TO_secure_memcpy(tls_ctx->client_session_id, p, tls_ctx->client_session_id_len);
+			p += tls_ctx->client_session_id_len;
 			len = (uint32_t)len16;
 			TO_LOG_INF("==> ClientHello",0);
 #ifdef TO_ENABLE_DTLS
@@ -2426,7 +2454,11 @@ TO_lib_ret_t TOSE_helper_tls_do_handshake_step(
 		case TO_TLS_STATE_SERVER_HELLO_VERIFY_REQUEST:
 			TO_LOG_INF("<== HelloVerifyRequest",0);
 			ret = TOSE_tls_handle_hello_verify_request(tls_ctx->ctx, tls_ctx->pbuf, len);
-			if (ret != TORSP_SUCCESS) { break; }
+			if (ret != TORSP_SUCCESS) {
+				TO_LOG_ERR("Unexpected error met calling TOSE_tls_handle_hello_verify_request => 0x%X.", ret);
+
+				break;
+			}
 			tls_ctx->state = TO_TLS_STATE_FLIGHT_3;
 			FALL_THROUGH
 		case TO_TLS_STATE_FLIGHT_3:
@@ -2440,7 +2472,11 @@ TO_lib_ret_t TOSE_helper_tls_do_handshake_step(
 			break;
 		case TO_TLS_STATE_CLIENT_HELLO_WITH_COOKIE:
 			ret = TOSE_tls_get_client_hello(tls_ctx->ctx, timestamp, tls_ctx->pbuf + TLS_FLIGHT_HEADER_SIZE, &len16);
-			if (ret != TORSP_SUCCESS) { break; }
+			if (ret != TORSP_SUCCESS) {
+				TO_LOG_ERR("Unexpected error met calling TOSE_tls_get_client_hello => 0x%X.", ret);
+
+				break;
+			}
 			TO_LOG_INF("==> ClientHello (with cookie",0);
 			len = (uint32_t)len16;
 #endif
@@ -2456,15 +2492,17 @@ TO_lib_ret_t TOSE_helper_tls_do_handshake_step(
 				TO_LOG_INF("<== ServerHello",0);
 				ret = TOSE_tls_handle_server_hello(tls_ctx->ctx, tls_ctx->pbuf, len);
 				if (ret != TORSP_SUCCESS) {
+					TO_LOG_ERR("Unexpected error met calling TOSE_tls_handle_server_hello => 0x%X.", ret);
+
 					break;
 				}
 
-				uint8_t *p = tls_ctx->pbuf + _TLS_HANDSHAKE_HEADER_SIZE + 2 * sizeof(uint8_t) + TO_TLS_RANDOM_SIZE;
+				p = tls_ctx->pbuf + _TLS_HANDSHAKE_HEADER_SIZE + 2 * sizeof(uint8_t) + TO_TLS_RANDOM_SIZE;
 				uint16_t offset = 0;
 				/* Check session ID */
 				uint8_t session_id_len = p[offset++];
 				uint16_t tmp16;
-				if (session_id_len &&
+				if ((session_id_len) &&
 						(session_id_len == tls_ctx->client_session_id_len) &&
 						! TO_secure_memcmp(tls_ctx->client_session_id,
 							p + offset,
@@ -2477,7 +2515,11 @@ TO_lib_ret_t TOSE_helper_tls_do_handshake_step(
 				GET_BE16_NOINC(p, offset, tmp16);
 				tls_ctx->cipher_suite = (TO_tls_cipher_suite_t)tmp16;
 				ret_lib = _tls_set_types(tls_ctx);
-				if (ret_lib != TO_OK) { break; }
+				if (ret_lib != TO_OK) {
+					TO_LOG_ERR("Unexpected error met calling _tls_set_types => 0x%X.", ret_lib);
+
+					break;
+				}
 				TO_LOG_INF("Detected cipher suite: %04x", tls_ctx->cipher_suite);
 				offset += sizeof(uint16_t);
 				/* Skip compression method */
@@ -2496,7 +2538,9 @@ TO_lib_ret_t TOSE_helper_tls_do_handshake_step(
 #ifdef TO_ENABLE_DTLS
 						case TO_TLS_EXTENSION_CONNECTION_ID:
 							tls_ctx->connection_id_len = p[offset];
-							TO_secure_memcpy(tls_ctx->connection_id, p + offset + sizeof(uint8_t), tls_ctx->connection_id_len);
+							TO_secure_memcpy(tls_ctx->connection_id,
+									p + offset + sizeof(uint8_t),
+									tls_ctx->connection_id_len);
 							TO_LOG_INF("Detected ConnectionID (%u bytes):", tls_ctx->connection_id_len);
 							TO_LOG_INF_HEX(tls_ctx->connection_id, tls_ctx->connection_id_len);
 							break;
@@ -2512,9 +2556,11 @@ TO_lib_ret_t TOSE_helper_tls_do_handshake_step(
 					case TO_TLS_CIPHER_SUITE_ECDHE:
 						tls_ctx->state = TO_TLS_STATE_SERVER_CERTIFICATE;
 						break;
+
 					case TO_TLS_CIPHER_SUITE_PSK:
 						tls_ctx->state = TO_TLS_STATE_SERVER_KEY_EXCHANGE;
 						break;
+
 					default:
 						TO_LOG_ERR("No next state defined for cipher suite %04x",
 								tls_ctx->cipher_suite);
@@ -2525,13 +2571,21 @@ TO_lib_ret_t TOSE_helper_tls_do_handshake_step(
 		case TO_TLS_STATE_SERVER_CERTIFICATE:
 			TO_LOG_INF("<== Certificate",0);
 #ifndef TO_DISABLE_API_HELPER_TLS_HANDLE_SERVER_CERTIFICATE
-			ret_lib = TOSE_helper_tls_handle_server_certificate(tls_ctx->ctx, tls_ctx->pbuf, len);
+			ret_lib = TOSE_helper_tls_handle_server_certificate(tls_ctx->ctx,
+					tls_ctx->pbuf,
+					len);
 			if (ret_lib != TO_OK) {
+				TO_LOG_ERR("Unexpected error met calling TOSE_helper_tls_handle_server_certificate => 0x%X.", ret);
+
 				break;
 			}
 #else
-			ret = TOSE_tls_handle_server_certificate(tls_ctx->ctx, tls_ctx->pbuf, len);
+			ret = TOSE_tls_handle_server_certificate(tls_ctx->ctx,
+					tls_ctx->pbuf,
+					len);
 			if (ret != TORSP_SUCCESS) {
+				TO_LOG_ERR("Unexpected error met calling TOSE_tls_handle_server_certificate => 0x%X.", ret);
+
 				break;
 			}
 #endif
@@ -2550,14 +2604,20 @@ TO_lib_ret_t TOSE_helper_tls_do_handshake_step(
 #ifndef TO_DISABLE_API_HELPER_TLS_HANDLE_SERVER_KEY_EXCHANGE
 			ret_lib = TO_ERROR | TORSP_UNKNOWN_CMD;
 			if (tls_ctx->cipher_suite_type == TO_TLS_CIPHER_SUITE_ECDHE) {
-				ret_lib = TOSE_helper_tls_handle_server_key_exchange(tls_ctx->ctx, tls_ctx->pbuf, len);
+				ret_lib = TOSE_helper_tls_handle_server_key_exchange(tls_ctx->ctx,
+						tls_ctx->pbuf,
+						len);
 			}
 			if (TO_SE_ERRCODE(ret_lib) == TORSP_UNKNOWN_CMD)
 #endif
 			{
 				ret_lib = TO_OK;
-				ret = TOSE_tls_handle_server_key_exchange(tls_ctx->ctx, tls_ctx->pbuf, len);
+				ret = TOSE_tls_handle_server_key_exchange(tls_ctx->ctx,
+						tls_ctx->pbuf,
+						len);
 				if (ret != TORSP_SUCCESS) {
+					TO_LOG_ERR("Unexpected error met calling TOSE_tls_handle_server_key_exchange => 0x%X.", ret);
+
 					break;
 				}
 			}
@@ -2581,6 +2641,8 @@ TO_lib_ret_t TOSE_helper_tls_do_handshake_step(
 			TO_LOG_INF("<== CertificateRequest",0);
 			ret = TOSE_tls_handle_certificate_request(tls_ctx->ctx, tls_ctx->pbuf, len);
 			if (ret != TORSP_SUCCESS) {
+				TO_LOG_ERR("Unexpected error met calling TOSE_tls_handle_certificate_request => 0x%X.", ret);
+
 				break;
 			}
 			tls_ctx->state = TO_TLS_STATE_SERVER_HELLO_DONE;
@@ -2590,6 +2652,8 @@ TO_lib_ret_t TOSE_helper_tls_do_handshake_step(
 			TO_LOG_INF("<== ServerHelloDone",0);
 			ret = TOSE_tls_handle_server_hello_done(tls_ctx->ctx, tls_ctx->pbuf, len);
 			if (ret != TORSP_SUCCESS) {
+				TO_LOG_ERR("Unexpected error met calling TOSE_tls_handle_server_hello_done => 0x%X.", ret);
+
 				break;
 			}
 #if !defined(TO_DISABLE_TLS_MEDIATOR)
@@ -2603,6 +2667,8 @@ TO_lib_ret_t TOSE_helper_tls_do_handshake_step(
 				TO_LOG_INF("<== MediatorCertificate",0);
 				ret = TOSE_tls_handle_mediator_certificate(tls_ctx->ctx, tls_ctx->pbuf, len);
 				if (ret != TORSP_SUCCESS) {
+					TO_LOG_ERR("Unexpected error met calling TOSE_tls_handle_mediator_certificate => 0x%X.", ret);
+
 					break;
 				}
 			}
@@ -2635,7 +2701,13 @@ TO_lib_ret_t TOSE_helper_tls_do_handshake_step(
 				ret_lib = TO_OK;
 				/* Try to fallback on old method */
 				ret = TOSE_tls_get_certificate(tls_ctx->ctx, tls_ctx->pbuf + TLS_FLIGHT_HEADER_SIZE, &len16);
+				if (ret == TORSP_INVALID_OUTPUT_LEN) {
+					/* Try to fallback on old method */
+					ret = TOSE_tls_get_certificate(tls_ctx->ctx, tls_ctx->pbuf + TLS_FLIGHT_HEADER_SIZE, &len16);
+				}
 				if (ret != TORSP_SUCCESS) {
+					TO_LOG_ERR("Unexpected error met calling TOSE_tls_get_certificate => 0x%X.", ret);
+
 					break;
 				}
 			}
@@ -2651,8 +2723,13 @@ TO_lib_ret_t TOSE_helper_tls_do_handshake_step(
 			tls_ctx->state = TO_TLS_STATE_CLIENT_KEY_EXCHANGE;
 			break;
 		case TO_TLS_STATE_CLIENT_KEY_EXCHANGE:
+
+			// Set the right available length
+			len16 = TOSE_HELPER_TLS_IO_BUFFER_SIZE - TLS_FLIGHT_HEADER_SIZE;
 			ret = TOSE_tls_get_client_key_exchange(tls_ctx->ctx, tls_ctx->pbuf + TLS_FLIGHT_HEADER_SIZE, &len16);
 			if (ret != TORSP_SUCCESS) {
+				TO_LOG_ERR("Unexpected error met calling TOSE_tls_get_client_key_exchange => 0x%X.", ret);
+
 				break;
 			}
 			TO_LOG_INF("==> ClientKeyExchange",0);
@@ -2676,6 +2753,7 @@ TO_lib_ret_t TOSE_helper_tls_do_handshake_step(
 			break;
 
 		case TO_TLS_STATE_CLIENT_CERTIFICATE_VERIFY:
+			len16 = TOSE_HELPER_TLS_IO_BUFFER_SIZE - TLS_FLIGHT_HEADER_SIZE;
 			ret = TOSE_tls_get_certificate_verify(tls_ctx->ctx, tls_ctx->pbuf + TLS_FLIGHT_HEADER_SIZE, &len16);
 			if (ret != TORSP_SUCCESS) {
 				break;
@@ -2686,6 +2764,7 @@ TO_lib_ret_t TOSE_helper_tls_do_handshake_step(
 			break;
 
 		case TO_TLS_STATE_CLIENT_CHANGE_CIPHER_SPEC:
+			len16 = TOSE_HELPER_TLS_IO_BUFFER_SIZE - TLS_FLIGHT_HEADER_SIZE;
 			ret = TOSE_tls_get_change_cipher_spec(tls_ctx->ctx, tls_ctx->pbuf + TLS_FLIGHT_HEADER_SIZE, &len16);
 			if (ret != TORSP_SUCCESS) {
 				break;
@@ -2709,8 +2788,11 @@ TO_lib_ret_t TOSE_helper_tls_do_handshake_step(
 #else
 			tls_ctx->pbuf += tls_ctx->iv_len;
 #endif
+			len16 = TOSE_HELPER_TLS_IO_BUFFER_SIZE - TLS_FLIGHT_HEADER_SIZE - tls_ctx->iv_len;
 			ret = TOSE_tls_get_finished(tls_ctx->ctx, tls_ctx->pbuf + TLS_FLIGHT_HEADER_SIZE, &len16);
-			if (ret != TORSP_SUCCESS) { break; }
+			if (ret != TORSP_SUCCESS) {
+				break;
+			}
 			TO_LOG_INF("==> Finished",0);
 			len = (uint32_t)len16;
 			if (tls_ctx->abbreviated_handshake) {
@@ -2725,6 +2807,7 @@ TO_lib_ret_t TOSE_helper_tls_do_handshake_step(
 			next_rx = 1;
 			tls_ctx->state = TO_TLS_STATE_FLIGHT_6_INIT;
 			break;
+
 		case TO_TLS_STATE_SERVER_CHANGE_CIPHER_SPEC:
 			TO_LOG_INF("<== ChangeCipherSpec",0);
 			ret = TOSE_tls_handle_change_cipher_spec(tls_ctx->ctx, tls_ctx->pbuf, len);
@@ -2740,6 +2823,7 @@ TO_lib_ret_t TOSE_helper_tls_do_handshake_step(
 			tls_ctx->decryption = 1;
 			tls_ctx->state = TO_TLS_STATE_SERVER_FINISHED;
 			break;
+
 		case TO_TLS_STATE_SERVER_FINISHED:
 			TO_LOG_INF("<== Finished",0);
 			ret = TOSE_tls_handle_finished(tls_ctx->ctx, tls_ctx->pbuf, len);
@@ -2761,6 +2845,7 @@ TO_lib_ret_t TOSE_helper_tls_do_handshake_step(
 				tls_ctx->state = TO_TLS_STATE_HANDSHAKE_DONE;
 			}
 			break;
+
 		default:
 			TO_LOG_ERR("Unknown state %u\n", tls_ctx->state);
 			break;
@@ -2770,6 +2855,7 @@ TO_lib_ret_t TOSE_helper_tls_do_handshake_step(
 		ret_lib = (ret == TORSP_SUCCESS) ? ret_lib : (ret | TO_ERROR);
 		TO_LOG_ERR("TO call failed (state: %04x, ret: %02x)", tls_ctx->state, ret_lib);
 		tls_alert(tls_ctx, ALERT_LEVEL_FATAL, ALERT_DESC_HANDSHAKE_FAILURE);
+
 		return ret_lib;
 	}
 
@@ -2779,6 +2865,7 @@ TO_lib_ret_t TOSE_helper_tls_do_handshake_step(
 		if (tls_ctx->pbuf + len > tls_ctx->flight_buf + TOSE_HELPER_TLS_FLIGHT_BUFFER_SIZE) {
 			TO_LOG_ERR("flight buffer overflow, %lu bytes needed",
 					(unsigned long int)((tls_ctx->pbuf - tls_ctx->flight_buf) + len));
+
 			return TO_ERROR;
 		}
 
@@ -2791,6 +2878,7 @@ TO_lib_ret_t TOSE_helper_tls_do_handshake_step(
 #endif
 		if (ret_lib != TO_OK) {
 			TO_LOG_ERR("Failed to send %u bytes", (uint32_t)len);
+
 			return ret_lib;
 		}
 #if defined(TO_ENABLE_DTLS) && !defined(TO_DISABLE_DTLS_RETRANSMISSION)
@@ -2801,6 +2889,7 @@ TO_lib_ret_t TOSE_helper_tls_do_handshake_step(
 	tls_ctx->rx = next_rx;
 
 	if (tls_ctx->state != TO_TLS_STATE_HANDSHAKE_DONE) {
+
 		return TO_AGAIN;
 	}
 
@@ -2827,6 +2916,7 @@ TO_lib_ret_t TOSE_helper_tls_do_handshake(
 
 	if (ret != TO_OK) {
 		TO_LOG_ERR("TOSE_helper_tls_do_handshake_step() failed",0);
+
 		return ret;
 	}
 

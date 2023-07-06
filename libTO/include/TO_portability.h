@@ -328,6 +328,13 @@ extern char *TO_safe_strcpy(char * dst, const char * src);
  */
 extern char *TO_safe_strncpy(char * dst, const char * src, size_t num);
 
+/**
+ * @brief Safe strlen function, available whatever the architecture.
+ * @warning The architecture's capability may be taken into account differently in input and output.
+ * @param src C string to be copied.
+ * @return size_t  String length
+ */
+extern size_t TO_safe_strlen(const char * src);
 
 /**
  * @brief Safe memcmp function, available whatever the architecture.
@@ -336,14 +343,14 @@ extern char *TO_safe_strncpy(char * dst, const char * src, size_t num);
  * @param ptr1 Buffer 1 to be compared with
  * @param ptr2 Buffer 2 to be compared with
  * @param num Number of bytes to compare on
- * @return int 
+ * @return int
  */
 extern int TO_safe_memcmp( const void * ptr1, const void * ptr2, size_t num );
 
 /**
  * @brief This macro is used to access constants at their current place
  * whereas their access is made using an absolute address, and not a relative one.
- * 
+ *
  */
 #ifdef __XTENSA__
 #define TO_RELATIVE_CONST(adr,base)	(void *)((uint8_t *)(adr) + (base))

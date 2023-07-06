@@ -79,7 +79,7 @@ extern TO_ret_t TOSE_validate_new_fw_hash(TOSE_ctx_t *ctx,
  * new challenge before calling this function again.
  *
  * @param[in] ctx SE context.
- * @param[in] signed_challenge The HMAC of the challenge previously requrested
+ * @param[in] signed_challenge The HMAC of the challenge previously requested
  * by TOSE_get_challenge_and_store().
  *
  * @return

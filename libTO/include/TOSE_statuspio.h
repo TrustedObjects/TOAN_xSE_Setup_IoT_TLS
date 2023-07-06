@@ -57,11 +57,11 @@ extern TO_ret_t TOSE_set_status_PIO_config(TOSE_ctx_t *ctx, int enable,
  * @brief Return Secure Element status PIO notification configuration.
  * @param[in] ctx Pointer to the SE context
  * @param[out] enable Set to 1 if status PIO notification enabled
- * @param[out] opendrain Method to signal level, see TO_set_status_PIO_config()
+ * @param[out] opendrain Method to signal level, see TOSE_set_status_PIO_config()
  * @param[out] ready_level PIO level to signal ready state, see
- * TO_set_status_PIO_config()
+ * TOSE_set_status_PIO_config()
  * @param[out] idle_hz Idle state signalled by PIO high impedance, see
- * TO_set_status_PIO_config()
+ * TOSE_set_status_PIO_config()
  *
  * Note: this function do not have BUSY / READY states, the PIO remains in the
  * IDLE state when called.

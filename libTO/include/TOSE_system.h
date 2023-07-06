@@ -31,6 +31,8 @@ extern "C" {
  * @brief Returns the unique Secure Element serial number
  * @param[in] ctx Pointer to the SE context
  * @param[out] serial_number Secure Element serial number
+ * @param[in,out] serial_number_length Pointer to the length. Indicates the
+ * available space for storing the SN. In return, indicates how many bytes are useful.
  *
  * The Serial Number is encoded on 8 bytes :
  * - The first 3 bytes identify the application ID.
@@ -47,7 +49,8 @@ extern "C" {
  * @endcond
  */
 extern TO_ret_t TOSE_get_serial_number(TOSE_ctx_t *ctx,
-		uint8_t serial_number[TO_SN_SIZE]);
+		uint8_t *serial_number,
+		uint16_t *serial_number_length);
 
 /**
  * @brief Returns the hardware serial number
@@ -65,7 +68,8 @@ extern TO_ret_t TOSE_get_serial_number(TOSE_ctx_t *ctx,
  * @endcond
  */
 extern TO_ret_t TOSE_get_hardware_serial_number(TOSE_ctx_t *ctx,
-		uint8_t hardware_serial_number[TO_HW_SN_SIZE]);
+		uint8_t *hardware_serial_number,
+		uint16_t *hardware_serial_number_length);
 
 /**
  * @brief Returns the Secure Element product number
@@ -86,12 +90,14 @@ extern TO_ret_t TOSE_get_hardware_serial_number(TOSE_ctx_t *ctx,
  * @endcond
  */
 extern TO_ret_t TOSE_get_product_number(TOSE_ctx_t *ctx,
-		uint8_t product_number[TO_PN_SIZE]);
+		uint8_t *product_number,
+		uint16_t *product_number_length);
 
 /**
  * @brief Returns the Secure Element hardware version
  * @param[in] ctx Pointer to the SE context
  * @param[out] hardware_version Secure Element hardware version
+ * @param[in,out] hardware_version_length Secure Element hardware version length
  *
  * Hardware version is encoded on 2 bytes. Available values are:
  * - 00 00: Software
@@ -108,7 +114,8 @@ extern TO_ret_t TOSE_get_product_number(TOSE_ctx_t *ctx,
  * @endcond
  */
 extern TO_ret_t TOSE_get_hardware_version(TOSE_ctx_t *ctx,
-		uint8_t hardware_version[TO_HW_VERSION_SIZE]);
+		uint8_t *hardware_version,
+		uint16_t *hardware_version_length);
 
 /**
  * @brief Returns the Secure Element software version
@@ -134,6 +141,7 @@ extern TO_ret_t TOSE_get_software_version(TOSE_ctx_t *ctx,
  * @brief Returns the Secure Element product identifier
  * @param[in] ctx Pointer to the SE context
  * @param[out] product_id Secure Element product identifier
+ * @param[in,out] product_id_length Secure Element product identifier
  *
  * The product identifier is a text string, encoded on maximum 15 ASCII bytes.
  * It identifies the personalization profile.
@@ -149,13 +157,14 @@ extern TO_ret_t TOSE_get_software_version(TOSE_ctx_t *ctx,
  * @endcond
  */
 extern TO_ret_t TOSE_get_product_id(TOSE_ctx_t *ctx,
-		uint8_t product_id[TO_PRODUCT_ID_SIZE]);
+		uint8_t *product_id,
+		uint16_t *product_id_length);
 
 /**
  * @brief Returns a random number of the given length
  * @param[in] ctx Pointer to the SE context
- * @param[in] random_length Requested random length
  * @param[out] random Returned random number
+ * @param[in] random_length Requested random length
  *
  * Request a random number to Secure Element random number generator.
  *
@@ -171,8 +180,8 @@ extern TO_ret_t TOSE_get_product_id(TOSE_ctx_t *ctx,
  * @endcond
  */
 extern TO_ret_t TOSE_get_random(TOSE_ctx_t *ctx,
-		const uint16_t random_length,
-		uint8_t* random);
+		uint8_t* random,
+		const uint16_t random_length);
 
 /**
  * @brief Returns the dummy data

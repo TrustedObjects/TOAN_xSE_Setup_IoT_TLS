@@ -41,6 +41,8 @@
 
 #include "TO.h"
 
+#ifndef TODRV_SSE_DRIVER_DISABLE
+
 #include "stm32l4xx_hal.h"
 #include "stm32l4xx_hal_flash_ex.h"
 
@@ -78,7 +80,7 @@
 #define SECURE_STORAGE_NVM_ADDRESS 0x80A0000  // TODO: For tests , put far away !!!
 
 /* See TOP_info.h/TOP_SECURE_STORAGE_NVM_FOOTPRINT; align value to a number of sectors */
-#define SECURE_STORAGE_NVM_SIZE (32*2048)
+#define SECURE_STORAGE_NVM_SIZE (2 * (((TOP_SECURE_STORAGE_NVM_FOOTPRINT + TODRV_SSE_NVM_SECTOR_SIZE -1) / TODRV_SSE_NVM_SECTOR_SIZE) * TODRV_SSE_NVM_SECTOR_SIZE))
 
 /******************************************************************************/
 /* Debug / Logging options                                                    */
@@ -350,3 +352,4 @@ static TO_lib_ret_t _secure_storage_program(const uint32_t flash_address, const 
 	return TO_OK;
 }
 
+#endif /* TODRV_SSE_DRIVER_DISABLE */

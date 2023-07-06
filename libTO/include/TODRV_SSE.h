@@ -13,17 +13,19 @@
 #ifndef _TODRV_SSE_H_
 #define _TODRV_SSE_H_
 
-#ifndef TODRV_SSE_DRIVER_DISABLE
-
 #include "TODRV_SSE_cfg.h"
 #include "TO_retcodes.h"
 #include "TO_defs.h"
-#include "TOP_info.h"
 #include "TO_driver.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+// When using the serializer, we do not manage the secure storage, it is
+// managed by the SSE, with which we discuss through the serializer ...
+#ifdef TODRV_SSE_NVM_INTERFACE
+#include "TOP_info.h"
 
 // Defines the number of bytes lost at the end of a secure storage bank
 #define SECTOR_LOST_BYTES (TOP_SECURE_STORAGE_NVM_FOOTPRINT - ((TOP_SECURE_STORAGE_NVM_FOOTPRINT / TODRV_SSE_NVM_SECTOR_SIZE) * TODRV_SSE_NVM_SECTOR_SIZE))
@@ -71,18 +73,6 @@ extern TO_lib_ret_t TODRV_SSE_secure_storage_load(uint8_t *dst, uint32_t src_off
  */
 extern TO_lib_ret_t TODRV_SSE_secure_storage_store(uint32_t dst_offset, const uint8_t *src, uint32_t size);
 
-/** @addtogroup context_api
- * @{ */
-
-/**
- * @brief Get SSE context
- *
- * @return SSE context pointer
- */
-extern TOSE_ctx_t* TODRV_SSE_get_ctx(void);
-
-/** @} */
-
 /** @addtogroup drv_test_api
  * @{ */
 
@@ -123,6 +113,28 @@ extern TO_lib_ret_t TODRV_SSE_set_top_address(void *sse_top_address);
 }
 #endif
 
-#endif // TODRV_SSE_DRIVER_DISABLE
+#else
+#define SECTOR_LOST_BYTES			0
+#endif // TODRV_SSE_ENABLE_SERIALIZER
+
+/** @addtogroup context_api
+ * @{ */
+
+/**
+ * @brief Get SSE context
+ *
+ * @return SSE context pointer
+ */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern TOSE_ctx_t* TODRV_SSE_get_ctx(void);
+
+#ifdef __cplusplus
+}
+#endif
+
+/** @} */
 
 #endif // _TODRV_SSE_H_

@@ -34,7 +34,7 @@
 
 #ifndef TO_LOG_LEVEL_MAX
 /* log level max */
-#define TO_LOG_LEVEL_MAX 2
+#define TO_LOG_LEVEL_MAX TO_LOG_LEVEL_NONE
 #endif
 
 /*
@@ -62,9 +62,19 @@
 /* #undef TO_DISABLE_ADMIN */
 #endif
 
+#ifndef TO_ENABLE_ADMIN
+/* enable administration APIs */
+#define TO_ENABLE_ADMIN 1
+#endif
+
 #ifndef TO_DISABLE_AES_ENCRYPT
 /* disable AES encrypt APIs */
 /* #undef TO_DISABLE_AES_ENCRYPT */
+#endif
+
+#ifndef TO_ENABLE_AES_ENCRYPT
+/* enable AES encrypt APIs */
+#define TO_ENABLE_AES_ENCRYPT 1
 #endif
 
 #ifndef TO_DISABLE_API_GET_RANDOM
@@ -72,9 +82,19 @@
 /* #undef TO_DISABLE_API_GET_RANDOM */
 #endif
 
+#ifndef TO_ENABLE_API_GET_RANDOM
+/* enable get_random API */
+#define TO_ENABLE_API_GET_RANDOM 1
+#endif
+
 #ifndef TO_DISABLE_CAPI
 /* disable cumulative APIs */
-/* #undef TO_DISABLE_CAPI */
+#define TO_DISABLE_CAPI 1
+#endif
+
+#ifndef TO_ENABLE_CAPI
+/* enable cumulative APIs */
+/* #undef TO_ENABLE_CAPI */
 #endif
 
 #ifndef TO_DISABLE_CERT_MGMT
@@ -82,9 +102,19 @@
 /* #undef TO_DISABLE_CERT_MGMT */
 #endif
 
+#ifndef TO_ENABLE_CERT_MGMT
+/* enable certificates APIs */
+#define TO_ENABLE_CERT_MGMT 1
+#endif
+
 #ifndef TO_DISABLE_CMAC
 /* disable CMAC APIs */
-#define TO_DISABLE_CMAC 1
+/* #undef TO_DISABLE_CMAC */
+#endif
+
+#ifndef TO_ENABLE_CMAC
+/* enable CMAC APIs */
+#define TO_ENABLE_CMAC 1
 #endif
 
 #ifndef TO_DISABLE_FINGERPRINT
@@ -94,7 +124,12 @@
 
 #ifndef TO_DISABLE_HMAC
 /* disable HMAC APIs */
-#define TO_DISABLE_HMAC 1
+/* #undef TO_DISABLE_HMAC */
+#endif
+
+#ifndef TO_ENABLE_HMAC
+/* enable HMAC APIs */
+#define TO_ENABLE_HMAC 1
 #endif
 
 #ifndef TO_DISABLE_GCM
@@ -102,9 +137,14 @@
 /* #undef TO_DISABLE_GCM */
 #endif
 
+#ifndef TO_ENABLE_GCM
+/* enable GCM */
+#define TO_ENABLE_GCM 1
+#endif
+
 #ifndef TO_DISABLE_KEYS_MGMT
 /* disable keys APIs */
-#define TO_DISABLE_KEYS_MGMT 1
+/* #undef TO_DISABLE_KEYS_MGMT */
 #endif
 
 #ifndef TO_DISABLE_LORA
@@ -124,12 +164,22 @@
 
 #ifndef TO_DISABLE_SEC_MSG
 /* disable secure messaging APIs */
-#define TO_DISABLE_SEC_MSG 1
+/* #undef TO_DISABLE_SEC_MSG */
+#endif
+
+#ifndef TO_ENABLE_SEC_MSG
+/* enable secure messaging APIs */
+#define TO_ENABLE_SEC_MSG 1
 #endif
 
 #ifndef TO_DISABLE_SHA256
 /* disable SHA256 APIs */
-#define TO_DISABLE_SHA256 1
+/* #undef TO_DISABLE_SHA256 */
+#endif
+
+#ifndef TO_ENABLE_SHA256
+/* enable SHA256 APIs */
+#define TO_ENABLE_SHA256 1
 #endif
 
 #ifndef TO_DISABLE_SIGNING
@@ -137,9 +187,19 @@
 /* #undef TO_DISABLE_SIGNING */
 #endif
 
+#ifndef TO_ENABLE_SIGNING
+/* enable signing APIs */
+#define TO_ENABLE_SIGNING 1
+#endif
+
 #ifndef TO_DISABLE_STATUS_PIO_CONFIG
 /* disable Secure Element status notification PIO configuration */
 #define TO_DISABLE_STATUS_PIO_CONFIG 1
+#endif
+
+#ifndef TO_ENABLE_STATUS_PIO_CONFIG
+/* enable Secure Element status notification PIO configuration */
+/* #undef TO_ENABLE_STATUS_PIO_CONFIG */
 #endif
 
 #ifndef TO_DISABLE_TLS
@@ -147,9 +207,19 @@
 /* #undef TO_DISABLE_TLS */
 #endif
 
+#ifndef TO_ENABLE_TLS
+/* enable TLS */
+#define TO_ENABLE_TLS 1
+#endif
+
 #ifndef TO_DISABLE_TLS_OPTIMIZED
 /* disable TLS optimized APIs */
 /* #undef TO_DISABLE_TLS_OPTIMIZED */
+#endif
+
+#ifndef TO_ENABLE_TLS_OPTIMIZED
+/* enable TLS optimized APIs */
+#define TO_ENABLE_TLS_OPTIMIZED 1
 #endif
 
 #ifndef TO_DISABLE_TO_INFO
@@ -157,9 +227,19 @@
 /* #undef TO_DISABLE_TO_INFO */
 #endif
 
+#ifndef TO_ENABLE_TO_INFO
+/* enable Secure Element info APIs */
+#define TO_ENABLE_TO_INFO 1
+#endif
+
 #ifndef TO_DISABLE_LOADER
 /* disable Secure Element secure bootloader APIs */
 #define TO_DISABLE_LOADER 1
+#endif
+
+#ifndef TO_ENABLE_LOADER
+/* enable Secure Element secure bootloader APIs */
+/* #undef TO_ENABLE_LOADER */
 #endif
 
 #ifndef TO_DISABLE_MEASURE
@@ -167,9 +247,19 @@
 #define TO_DISABLE_MEASURE 1
 #endif
 
+#ifndef TO_ENABLE_MEASURE
+/* enable measured boot APIs */
+/* #undef TO_ENABLE_MEASURE */
+#endif
+
 #ifndef TO_DISABLE_IPP
 /* disable IPP */
 #define TO_DISABLE_IPP 1
+#endif
+
+#ifndef TO_ENABLE_IPP
+/* enable IPP */
+/* #undef TO_ENABLE_IPP */
 #endif
 
 /*

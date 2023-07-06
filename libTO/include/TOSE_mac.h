@@ -36,7 +36,8 @@ extern "C" {
  * @param[in] data Data to compute HMAC on
  * @param[in] data_length
  * @param[out] hmac_data Computed HMAC
- *
+ * @param[in,out] hmac_length
+
  * If you need to compute HMAC on more than 512 bytes, please use the sequence
  * TOSE_compute_hmac_init(), TOSE_compute_hmac_update(), ...,
  * TOSE_compute_hmac_final().
@@ -50,8 +51,12 @@ extern "C" {
  * - TO_MEMORY_ERROR: internal I/O buffer overflow
  * - TO_ERROR: generic error
  */
-extern TO_ret_t TOSE_compute_hmac(TOSE_ctx_t *ctx, const uint8_t key_index, const uint8_t* data,
-		const uint16_t data_length, uint8_t hmac_data[TO_HMAC_SIZE]);
+extern TO_ret_t TOSE_compute_hmac(TOSE_ctx_t *ctx,
+		const uint8_t key_index,
+		const uint8_t* data,
+		const uint16_t data_length,
+		uint8_t *hmac,
+		uint16_t *hmac_length);
 
 /**
  * @brief Compute HMAC on more than 512 bytes of data
@@ -98,6 +103,7 @@ extern TO_ret_t TOSE_compute_hmac_update(TOSE_ctx_t *ctx, const uint8_t* data, u
  * @brief Returns computed HMAC
  * @param[in] ctx Pointer to the SE context
  * @param[out] hmac Returned computed HMAC
+ * @param[in,out] hmac_length
  *
  * This is the last command of the sequence TOSE_compute_hmac_init(),
  * TOSE_compute_hmac_update(), ..., TOSE_compute_hmac_final().
@@ -112,7 +118,9 @@ extern TO_ret_t TOSE_compute_hmac_update(TOSE_ctx_t *ctx, const uint8_t* data, u
  * - TO_MEMORY_ERROR: internal I/O buffer overflow
  * - TO_ERROR: generic error
  */
-extern TO_ret_t TOSE_compute_hmac_final(TOSE_ctx_t *ctx, uint8_t hmac[TO_HMAC_SIZE]);
+extern TO_ret_t TOSE_compute_hmac_final(TOSE_ctx_t *ctx,
+		uint8_t *hmac,
+		uint16_t *hmac_length);
 
 /**
  * @brief Verifies if the HMAC tag is correct for the given data
@@ -183,7 +191,7 @@ extern TO_ret_t TOSE_verify_hmac_init(TOSE_ctx_t *ctx, uint8_t key_index);
  * - TO_MEMORY_ERROR: internal I/O buffer overflow
  * - TO_ERROR: generic error
  */
-extern TO_ret_t TOSE_verify_hmac_update(TOSE_ctx_t *ctx, const uint8_t* data, uint16_t length);
+extern TO_ret_t TOSE_verify_hmac_update(TOSE_ctx_t *ctx, const uint8_t* data, const uint16_t length);
 
 /**
  * @brief This command is used to send HMAC to verify

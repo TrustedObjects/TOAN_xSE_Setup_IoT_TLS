@@ -7,18 +7,17 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *
- * Copyright (C) 2019-2022 Trusted Objects. All rights reserved.
+ * Copyright (C) 2023 Trusted Objects. All rights reserved.
  */
 
 #include "TO_cfg.h"
-#ifndef TODRV_SSE_DRIVER_DISABLE
-
 #include "TO_defs.h"
 #include "TO_driver.h"
 
 #include "TODRV_SSE_cfg.h"
 #include "TODRV_SSE.h"
 
+#ifndef TODRV_SSE_ENABLE_SERIALIZER_HOST_SIDE
 #include "TOP.h"
 #include "TOP_vt.h"
 #include "TOP_info.h"
@@ -93,22 +92,43 @@ static TOP_ext_ctx_t sse_ctx_priv = {
 	.secure_storage = &TOP_data,
 };
 
-static TOSE_drv_ctx_t drv_ctx = {
+static TOSE_drv_ctx_t drv_sse_ctx = {
 	.api = (TODRV_api_t *)TODRV_SSE_TOP_API_ADDRESS,
 	.func_offset = TODRV_SSE_TOP_OFFSET_ADDRESS,
 	.priv_ctx  = (void *)&sse_ctx_priv,
 	.log_ctx = &log_ctx,
 };
 
-static TOSE_ctx_t drv_sse_ctx = {
-	.drv = &drv_ctx,
+static TOSE_ctx_t sse_ctx = {
+	.drv = &drv_sse_ctx,
 	.initialized = 0,
 };
 
 TOSE_ctx_t* TODRV_SSE_get_ctx(void)
 {
-	return &drv_sse_ctx;
+	return &sse_ctx;
 }
+
+#else
+extern const TODRV_api_t TOP_SHOST_vt;
+
+static TOSE_drv_ctx_t drv_host_ctx = {
+	.api = (TODRV_api_t *)&TOP_SHOST_vt,
+	.log_ctx = &log_ctx,
+	.priv_ctx = NULL,
+};
+
+static TOSE_ctx_t host_ctx = {
+	.drv = &drv_host_ctx,
+	.initialized = 0,
+};
+
+TOSE_ctx_t* TODRV_SSE_get_ctx(void)
+{
+	return &host_ctx;
+}
+
+#endif
 
 TO_lib_ret_t TODRV_SSE_set_top_address(void *sse_top_address)
 {
@@ -119,5 +139,3 @@ TO_lib_ret_t TODRV_SSE_set_top_address(void *sse_top_address)
 
 	return TO_OK;
 }
-
-#endif // TODRV_SSE_DRIVER_DISABLE

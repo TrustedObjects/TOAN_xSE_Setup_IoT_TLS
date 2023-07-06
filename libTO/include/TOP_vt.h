@@ -12,7 +12,7 @@
 
 /**
  * @file TOP_vt.h
- * @brief 
+ * @brief
  */
 
 #ifndef _TOP_VT_H_

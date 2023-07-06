@@ -77,7 +77,7 @@ static void TO_log_string(const TO_log_level_t level,
 	// Concat the ":"
 	strcat(log,": ");
 	len = strlen(log);
-	len = vsnprintf(log + len, sizeof(log) - len, str_format, args);
+	len = vsnprintf(log + len, sizeof(log) - len - 1, str_format, args);
 
 	// Make it appear wherever
 	print_log_function(level, log);
@@ -102,7 +102,7 @@ static void TO_log_hex_disp(const TO_log_level_t level,
 #ifdef __XTENSA__
 	uint8_t the_data[HEX_DISP_NB_COL];
 #else
-	uint8_t *the_data;
+	uint8_t *the_data = NULL;
 #endif
 
 	// Looping over data

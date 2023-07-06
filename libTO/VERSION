@@ -1,4 +1,6 @@
-libto-6.3.10
-libto-common-1.12.15
-libto-driver-hse-1.11.11
-libto-driver-sse-2.3.5
+libto-7.0.7
+libto-common-1.12.20
+libto-driver-sse-2.3.13
+libto-secure-storage-1.5.6
+to-protect-3.0.4
+libto-driver-sse-2.3.13

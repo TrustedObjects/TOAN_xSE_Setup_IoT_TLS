@@ -78,6 +78,9 @@ typedef enum TO_se_ret_e {
         /** The expected padding is not respected */
 	TORSP_INVALID_PADDING = 0x69,
 
+        /** The length of the output buffer is too short */
+	TORSP_INVALID_OUTPUT_LEN = 0x6A,
+
         /** A communication error has occurred */
 	TORSP_COM_ERROR = 0x72,
 

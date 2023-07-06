@@ -125,6 +125,11 @@ typedef enum command_identifiers_e {
 	TO_CMD_ID_GET_CERTIFICATE_SHORT				= 0x006E,
 	TO_CMD_ID_GET_CERTIFICATE_STANDALONE			= 0x006F,
 	TO_CMD_ID_ACCESS_DUMMY_DATA				= 0x0070,
+	TO_CMD_ID_GET_CERTIFICATE_X509_AND_SIGN			= 0x0071,
+	TO_CMD_ID_INIT						= 0x0072,
+	TO_CMD_ID_FINI						= 0x0073,
+	TO_CMD_ID_FLUSH						= 0x0074,
+	TO_CMD_ID_TLS_GET_CLIENT_HELLO_EXT			= 0x0075,
 	TO_CMD_ID_AES128CBC_HMAC_SECURE_MESSAGE			= 0x00A0,
 	TO_CMD_ID_AES128CBC_HMAC_UNSECURE_MESSAGE		= 0x00A1,
 	TO_CMD_ID_SHA256					= 0x00A2,
@@ -195,7 +200,6 @@ typedef enum command_identifiers_e {
 	TO_CMD_ID_SECLINK_AESHMAC_GET_IV			= 0xFF03,
 	TO_CMD_ID_SECLINK_ARC4_GET_NEW_KEY			= 0xFF04,
 	TO_CMD_ID_SECLINK_AESHMAC_GET_NEW_KEYS			= 0xFF05,
-	TO_CMD_ID_INIT						= 0xFF10,
 	TO_CMD_ID_GET_DURATION					= 0xFF11,
 	TO_CMD_ID_LOADER_BCAST_INITIALIZE_UPGRADE		= 0xFFF2,
 	TO_CMD_ID_LOADER_BCAST_WRITE_DATA			= 0xFFF3,
@@ -206,6 +210,7 @@ typedef enum command_identifiers_e {
 // Init
 #define TO_SE_CMD_INIT			                            ((uint16_t)TO_CMD_ID_INIT)
 #define TO_SE_CMD_GET_DURATION			                    ((uint16_t)TO_CMD_ID_GET_DURATION)
+#define TO_SE_CMD_FINI			                            ((uint16_t)TO_CMD_ID_FINI)
 
 // System
 #define TO_SE_CMD_RES		                                    ((uint16_t)TO_CMD_ID_RES)
@@ -321,6 +326,7 @@ typedef enum command_identifiers_e {
 #define TO_SE_CMD_RENEW_SHARED_KEYS 	                            ((uint16_t)TO_CMD_ID_RENEW_SHARED_KEYS)
 #define TO_SE_CMD_GET_KEY_FINGERPRINT 	                            ((uint16_t)TO_CMD_ID_GET_KEY_FINGERPRINT)
 #define TO_SE_CMD_GET_CERTIFICATE_X509                              ((uint16_t)TO_CMD_ID_GET_CERTIFICATE_X509)
+#define TO_SE_CMD_GET_CERTIFICATE_X509_AND_SIGN			    ((uint16_t)TO_CMD_ID_GET_CERTIFICATE_X509_AND_SIGN)
 #define TO_SE_CMD_SET_CERTIFICATE_X509                              ((uint16_t)TO_CMD_ID_SET_CERTIFICATE_X509)
 
 /* TLS optimized */
@@ -330,6 +336,7 @@ typedef enum command_identifiers_e {
 #define TO_SE_CMD_TLS_SET_SESSION 	                            ((uint16_t)TO_CMD_ID_TLS_SET_SESSION)
 #define TO_SE_CMD_TLS_SET_CONNECTION_ID_EXT_ID 	                    ((uint16_t)TO_CMD_ID_TLS_SET_CONNECTION_ID_EXT_ID)
 #define TO_SE_CMD_TLS_GET_CLIENT_HELLO 	                            ((uint16_t)TO_CMD_ID_TLS_GET_CLIENT_HELLO)
+#define TO_SE_CMD_TLS_GET_CLIENT_HELLO_EXT			    ((uint16_t)TO_CMD_ID_TLS_GET_CLIENT_HELLO_EXT)
 #define TO_SE_CMD_TLS_HANDLE_HELLO_VERIFY_REQUEST 	            ((uint16_t)TO_CMD_ID_TLS_HANDLE_HELLO_VERIFY_REQUEST)
 #define TO_SE_CMD_TLS_HANDLE_SERVER_HELLO 	                    ((uint16_t)TO_CMD_ID_TLS_HANDLE_SERVER_HELLO)
 #define TO_SE_CMD_TLS_HANDLE_SERVER_HELLO_INIT           	    ((uint16_t)TO_CMD_ID_TLS_HANDLE_SERVER_HELLO_INIT)

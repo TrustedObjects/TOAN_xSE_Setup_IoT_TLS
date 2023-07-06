@@ -147,26 +147,31 @@ TO_lib_ret_t TOSE_helper_set_certificate_x509(
 TO_lib_ret_t TOSE_helper_get_certificate_x509_and_sign(
 		TOSE_ctx_t *ctx, const uint8_t certificate_index,
 		const uint8_t *challenge, const uint16_t challenge_length,
-		uint8_t *certificate, uint16_t *size, uint8_t signature[TO_SIGNATURE_SIZE])
+		uint8_t *certificate, uint16_t *certificate_len, uint8_t signature[TO_SIGNATURE_SIZE])
 {
 	TO_ret_t ret;
 	uint16_t chunk_sz = 200;
 	uint16_t offset;
+	uint16_t signature_len;
 
 	ret = TOSE_get_certificate_x509_init(ctx, certificate_index);
 	if (ret == TORSP_UNKNOWN_CMD) {
 		/* If CAPI is not available, try direct API */
 		if (signature == NULL) {
-			ret = TOSE_get_certificate_x509(ctx, certificate_index,
-			certificate, size);
+			ret = TOSE_get_certificate_x509(ctx,
+					certificate_index,
+					certificate, certificate_len);
 			if (ret != TORSP_SUCCESS) {
 				return TO_ERROR | ret;
 			}
 			return TO_OK;
 		} else {
-			ret = TOSE_get_certificate_x509_and_sign(ctx, certificate_index,
-			challenge, challenge_length,
-			certificate, size, signature);
+			signature_len = TO_SIGNATURE_SIZE;
+			ret = TOSE_get_certificate_x509_and_sign(ctx,
+					certificate_index,
+					challenge, challenge_length,
+					certificate, certificate_len,
+					signature, &signature_len);
 			if (ret != TORSP_SUCCESS) {
 				return TO_ERROR | ret;
 			}
@@ -183,7 +188,7 @@ TO_lib_ret_t TOSE_helper_get_certificate_x509_and_sign(
 			return TO_ERROR | ret;
 		}
 
-		chunk_sz = MIN(*size - offset, chunk_sz);
+		chunk_sz = MIN(*certificate_len - offset, chunk_sz);
 	}
 
 	ret = TOSE_get_certificate_x509_final(ctx, challenge, challenge_length, signature);
@@ -192,7 +197,7 @@ TO_lib_ret_t TOSE_helper_get_certificate_x509_and_sign(
 	}
 
 	/* adjust the size to the certificate's size just read */
-	*size = offset;
+	*certificate_len = offset;
 
 	return TO_OK;
 }

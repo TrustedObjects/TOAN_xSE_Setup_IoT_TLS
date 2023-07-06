@@ -1,3 +1,27 @@
+7.0.7 - 2023-07-04
+- Removed a distribution constraint to to-protect-common
+
+7.0.6 - 2023-06-26
+- Changed the priority of a log message in the load/store in the RAM driver
+
+7.0.5 - 2023-06-20
+- Fix a bug related to Driver-SSE selection
+
+7.0.4 - 2023-06-20
+- Fix the build system (use SSE-SERIAL only if needed)
+
+7.0.3 - 2023-06-13
+- Re-add the secure storage constraint for building the distribition package correctly
+
+7.0.2 - 2023-06-07
+- Change ECIES parameters (merge encryption and mac)
+
+7.0.1 - 2023-06-05
+- Removing TO_legacy.h
+
+7.0.0 - 2023-06-01
+- New API with output length introduced
+
 6.3.10 - 2023-02-24
 - Using the newly defined X509_MAXSIZE
 

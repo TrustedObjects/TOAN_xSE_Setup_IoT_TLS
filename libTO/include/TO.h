@@ -61,14 +61,11 @@
 #endif
 #if defined(TOSE_DRIVER_HSE) && !defined (TODRV_HSE_DRIVER_DISABLE)
 #define DEFAULT_CTX (TODRV_HSE_get_ctx())
-#elif defined(TOSE_DRIVER_SSE) && !defined (TODRV_SSE_DRIVER_DISABLE)
+#elif defined(TOSE_DRIVER_SSE)
 #define DEFAULT_CTX (TODRV_SSE_get_ctx())
 #else
 #error "No default driver defined"
 #endif
-
-
-#include "TO_legacy.h"
 
 #endif
 

@@ -42,7 +42,7 @@ uint16_t TO_saferead_leuint16(const void* adr)
 
 	convert.bytes[0] = TO_saferead_uint8(adr);
 	convert.bytes[1] = TO_saferead_uint8((uint8_t *)adr + 1);
-	
+
 	return le16toh(convert.data);
 }
 
@@ -57,7 +57,7 @@ uint32_t TO_saferead_leuint24(const void* adr)
 	convert.bytes[0] = TO_saferead_uint8(adr);
 	convert.bytes[1] = TO_saferead_uint8((uint8_t *)adr + 1);
 	convert.bytes[2] = TO_saferead_uint8((uint8_t *)adr + 2);
-	
+
 	return le32toh(convert.data) & ((1 << 24) - 1);
 }
 
@@ -72,7 +72,7 @@ uint32_t TO_saferead_leuint32(const void* adr)
 	convert.bytes[1] = TO_saferead_uint8((uint8_t *)adr + 1);
 	convert.bytes[2] = TO_saferead_uint8((uint8_t *)adr + 2);
 	convert.bytes[3] = TO_saferead_uint8((uint8_t *)adr + 3);
-	
+
 	return le32toh(convert.data);
 }
 
@@ -89,7 +89,7 @@ uint64_t TO_saferead_leuint40(const void* adr)
 	convert.bytes[2] = TO_saferead_uint8((uint8_t *)adr + 2);
 	convert.bytes[3] = TO_saferead_uint8((uint8_t *)adr + 3);
 	convert.bytes[4] = TO_saferead_uint8((uint8_t *)adr + 4);
-	
+
 	return le64toh(convert.data) & (((uint64_t)1 << 40) - 1);
 }
 
@@ -107,7 +107,7 @@ uint64_t TO_saferead_leuint48(const void* adr)
 	convert.bytes[3] = TO_saferead_uint8((uint8_t *)adr + 3);
 	convert.bytes[4] = TO_saferead_uint8((uint8_t *)adr + 4);
 	convert.bytes[5] = TO_saferead_uint8((uint8_t *)adr + 5);
-	
+
 	return le64toh(convert.data) & (((uint64_t)1 << 48) - 1);
 }
 
@@ -126,7 +126,7 @@ uint64_t TO_saferead_leuint56(const void* adr)
 	convert.bytes[4] = TO_saferead_uint8((uint8_t *)adr + 4);
 	convert.bytes[5] = TO_saferead_uint8((uint8_t *)adr + 5);
 	convert.bytes[6] = TO_saferead_uint8((uint8_t *)adr + 6);
-	
+
 	return le64toh(convert.data) & (((uint64_t)1 << 56) - 1);
 }
 
@@ -146,7 +146,7 @@ uint64_t TO_saferead_leuint64(const void* adr)
 	convert.bytes[5] = TO_saferead_uint8((uint8_t *)adr + 5);
 	convert.bytes[6] = TO_saferead_uint8((uint8_t *)adr + 6);
 	convert.bytes[7] = TO_saferead_uint8((uint8_t *)adr + 7);
-	
+
 	return le64toh(convert.data);
 }
 
@@ -159,7 +159,7 @@ uint16_t TO_saferead_beuint16(const void* adr)
 
 	convert.bytes[0] = TO_saferead_uint8(adr);
 	convert.bytes[1] = TO_saferead_uint8((uint8_t *)adr + 1);
-	
+
 	return be16toh(convert.data);
 }
 
@@ -174,7 +174,7 @@ uint32_t TO_saferead_beuint24(const void* adr)
 	convert.bytes[1] = TO_saferead_uint8(adr);
 	convert.bytes[2] = TO_saferead_uint8((uint8_t *)adr + 1);
 	convert.bytes[3] = TO_saferead_uint8((uint8_t *)adr + 2);
-	
+
 	return be32toh(convert.data) & 0xffffff;
 }
 
@@ -189,7 +189,7 @@ uint32_t TO_saferead_beuint32(const void* adr)
 	convert.bytes[1] = TO_saferead_uint8((uint8_t *)adr + 1);
 	convert.bytes[2] = TO_saferead_uint8((uint8_t *)adr + 2);
 	convert.bytes[3] = TO_saferead_uint8((uint8_t *)adr + 3);
-	
+
 	return be32toh(convert.data);
 }
 
@@ -206,7 +206,7 @@ uint64_t TO_saferead_beuint40(const void* adr)
 	convert.bytes[5] = TO_saferead_uint8((uint8_t *)adr + 2);
 	convert.bytes[6] = TO_saferead_uint8((uint8_t *)adr + 3);
 	convert.bytes[7] = TO_saferead_uint8((uint8_t *)adr + 4);
-	
+
 	return be64toh(convert.data) & (((uint64_t)1 << 40) - 1);
 }
 
@@ -224,7 +224,7 @@ uint64_t TO_saferead_beuint48(const void* adr)
 	convert.bytes[5] = TO_saferead_uint8((uint8_t *)adr + 3);
 	convert.bytes[6] = TO_saferead_uint8((uint8_t *)adr + 4);
 	convert.bytes[7] = TO_saferead_uint8((uint8_t *)adr + 5);
-	
+
 	return be64toh(convert.data) & (((uint64_t)1 << 48) - 1);
 }
 
@@ -243,7 +243,7 @@ uint64_t TO_saferead_beuint56(const void* adr)
 	convert.bytes[5] = TO_saferead_uint8((uint8_t *)adr + 4);
 	convert.bytes[6] = TO_saferead_uint8((uint8_t *)adr + 5);
 	convert.bytes[7] = TO_saferead_uint8((uint8_t *)adr + 6);
-	
+
 	return be64toh(convert.data) & (((uint64_t)1 << 56) - 1);
 }
 
@@ -262,7 +262,7 @@ uint64_t TO_saferead_beuint64(const void* adr)
 	convert.bytes[5] = TO_saferead_uint8((uint8_t *)adr + 5);
 	convert.bytes[6] = TO_saferead_uint8((uint8_t *)adr + 6);
 	convert.bytes[7] = TO_saferead_uint8((uint8_t *)adr + 7);
-	
+
 	return be64toh(convert.data);
 }
 
@@ -526,6 +526,24 @@ char *TO_safe_strcpy(char * dst, const char * src)
 	return dst;
 #else
 	return strcpy(dst,src);
+#endif
+}
+
+size_t TO_safe_strlen(const char * src)
+{
+#ifdef __XTENSA__
+	uint8_t *source = (uint8_t *)src;
+	char car = TO_saferead_uint8(source++);
+	size_t len = 0;
+
+	while (car) {
+		len++;
+		car = TO_saferead_uint8(source++);
+	};
+
+	return len;
+#else
+	return strlen(src);
 #endif
 }
 

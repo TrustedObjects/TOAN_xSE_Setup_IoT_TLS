@@ -128,21 +128,24 @@ TO_ret_t TOSE_flush(TOSE_ctx_t *ctx) {
 
 TO_ret_t TOSE_get_serial_number(
 		TOSE_ctx_t *ctx,
-		uint8_t serial_number[TO_SN_SIZE]
+		uint8_t *serial_number,
+		uint16_t *serial_number_length
 ) {
-	DRV_CALL_CHECK(ctx, to_info, get_serial_number, GET_PRIV_CTX(ctx), serial_number)
+	DRV_CALL_CHECK(ctx, to_info, get_serial_number, GET_PRIV_CTX(ctx), serial_number, serial_number_length)
 }
 TO_ret_t TOSE_get_hardware_serial_number(
 		TOSE_ctx_t *ctx,
-		uint8_t hardware_serial_number[TO_HW_SN_SIZE]
+		uint8_t *hardware_serial_number,
+		uint16_t *hardware_serial_number_length
 ) {
-	DRV_CALL_CHECK(ctx, to_info, get_hardware_serial_number, GET_PRIV_CTX(ctx), hardware_serial_number)
+	DRV_CALL_CHECK(ctx, to_info, get_hardware_serial_number, GET_PRIV_CTX(ctx), hardware_serial_number, hardware_serial_number_length)
 }
 TO_ret_t TOSE_get_product_number(
 		TOSE_ctx_t *ctx,
-		uint8_t product_number[TO_PN_SIZE]
+		uint8_t *product_number,
+		uint16_t *product_number_length
 ) {
-	DRV_CALL_CHECK(ctx, to_info, get_product_number, GET_PRIV_CTX(ctx), product_number)
+	DRV_CALL_CHECK(ctx, to_info, get_product_number, GET_PRIV_CTX(ctx), product_number, product_number_length)
 }
 TO_ret_t TOSE_access_dummy_data(
 		TOSE_ctx_t *ctx,
@@ -153,9 +156,10 @@ TO_ret_t TOSE_access_dummy_data(
 }
 TO_ret_t TOSE_get_hardware_version(
 		TOSE_ctx_t *ctx,
-		uint8_t hardware_version[TO_HW_VERSION_SIZE]
+		uint8_t *hardware_version,
+		uint16_t *hardware_version_length
 ) {
-	DRV_CALL_CHECK(ctx, to_info, get_hardware_version, GET_PRIV_CTX(ctx), hardware_version)
+	DRV_CALL_CHECK(ctx, to_info, get_hardware_version, GET_PRIV_CTX(ctx), hardware_version, hardware_version_length)
 }
 TO_ret_t TOSE_get_software_version(
 		TOSE_ctx_t *ctx,
@@ -165,11 +169,9 @@ TO_ret_t TOSE_get_software_version(
 ) {
 	DRV_CALL_CHECK(ctx, to_info, get_software_version, GET_PRIV_CTX(ctx), major, minor, revision)
 }
-TO_ret_t TOSE_get_product_id(
-		TOSE_ctx_t *ctx,
-		uint8_t product_id[TO_PRODUCT_ID_SIZE]
-) {
-	DRV_CALL_CHECK(ctx, to_info, get_product_id, GET_PRIV_CTX(ctx), product_id)
+TO_ret_t TOSE_get_product_id(TOSE_ctx_t *ctx, uint8_t *product_id, uint16_t *product_id_length)
+{
+	DRV_CALL_CHECK(ctx, to_info, get_product_id, GET_PRIV_CTX(ctx), product_id, product_id_length)
 }
 TO_ret_t TOSE_sha256(
 		TOSE_ctx_t *ctx,
@@ -212,17 +214,20 @@ TO_ret_t TOSE_renew_ecc_keys(
 TO_ret_t TOSE_get_public_key(
 		TOSE_ctx_t *ctx,
 		const uint8_t key_index,
-		uint8_t public_key[TO_ECC_PUB_KEYSIZE],
-		uint8_t signature[TO_SIGNATURE_SIZE]
+		uint8_t *public_key,
+		uint16_t *public_key_length,
+		uint8_t *signature,
+		uint16_t *signature_length
 ) {
-	DRV_CALL_CHECK(ctx, keys_mgmt, get_public_key, GET_PRIV_CTX(ctx), key_index, public_key, signature)
+	DRV_CALL_CHECK(ctx, keys_mgmt, get_public_key, GET_PRIV_CTX(ctx), key_index, public_key, public_key_length, signature, signature_length)
 }
 TO_ret_t TOSE_get_unsigned_public_key(
 		TOSE_ctx_t *ctx,
 		const uint8_t key_index,
-		uint8_t public_key[TO_ECC_PUB_KEYSIZE]
+		uint8_t *public_key,
+		uint16_t *public_key_length
 ) {
-	DRV_CALL_CHECK(ctx, keys_mgmt, get_unsigned_public_key, GET_PRIV_CTX(ctx), key_index, public_key)
+	DRV_CALL_CHECK(ctx, keys_mgmt, get_unsigned_public_key, GET_PRIV_CTX(ctx), key_index, public_key, public_key_length)
 }
 TO_ret_t TOSE_renew_shared_keys(
 		TOSE_ctx_t *ctx,
@@ -242,12 +247,13 @@ TO_ret_t TOSE_get_key_fingerprint(
 TO_ret_t TOSE_aes128cbc_encrypt(
 		TOSE_ctx_t *ctx,
 		const uint8_t key_index,
-		const uint8_t* data,
+		const uint8_t *data,
 		const uint16_t data_length,
 		uint8_t initial_vector[TO_INITIALVECTOR_SIZE],
-		uint8_t* cryptogram
+		uint8_t *cryptogram,
+		uint16_t *cryptogram_length
 ) {
-	DRV_CALL_CHECK(ctx, aes_encrypt, aes128cbc_encrypt, GET_PRIV_CTX(ctx), key_index, data, data_length, initial_vector, cryptogram)
+	DRV_CALL_CHECK(ctx, aes_encrypt, aes128cbc_encrypt, GET_PRIV_CTX(ctx), key_index, data, data_length, initial_vector, cryptogram, cryptogram_length)
 }
 TO_ret_t TOSE_aes128cbc_iv_encrypt(
 		TOSE_ctx_t *ctx,
@@ -255,98 +261,107 @@ TO_ret_t TOSE_aes128cbc_iv_encrypt(
 		const uint8_t initial_vector[TO_INITIALVECTOR_SIZE],
 		const uint8_t* data,
 		const uint16_t data_length,
-		uint8_t* cryptogram
+		uint8_t *cryptogram,
+		uint16_t *cryptogram_length
 ) {
-	DRV_CALL_CHECK(ctx, aes_encrypt, aes128cbc_iv_encrypt, GET_PRIV_CTX(ctx), key_index, initial_vector, data, data_length, cryptogram)
+	DRV_CALL_CHECK(ctx, aes_encrypt, aes128cbc_iv_encrypt, GET_PRIV_CTX(ctx), key_index, initial_vector, data, data_length, cryptogram, cryptogram_length)
 }
 TO_ret_t TOSE_aes128cbc_decrypt(
 		TOSE_ctx_t *ctx,
 		const uint8_t key_index,
 		const uint8_t initial_vector[TO_INITIALVECTOR_SIZE],
-		const uint8_t* cryptogram,
+		const uint8_t *cryptogram,
 		const uint16_t cryptogram_length,
-		uint8_t* data
+		uint8_t *data,
+		uint16_t *data_length
 ) {
-	DRV_CALL_CHECK(ctx, aes_encrypt, aes128cbc_decrypt, GET_PRIV_CTX(ctx), key_index, initial_vector, cryptogram, cryptogram_length, data)
+	DRV_CALL_CHECK(ctx, aes_encrypt, aes128cbc_decrypt, GET_PRIV_CTX(ctx), key_index, initial_vector, cryptogram, cryptogram_length, data, data_length)
 }
 TO_ret_t TOSE_aes128gcm_encrypt(
 		TOSE_ctx_t *ctx,
 		const uint8_t key_index,
-		const uint8_t* data,
+		const uint8_t *data,
 		const uint16_t data_length,
-		const uint8_t* aad,
+		const uint8_t *aad,
 		const uint16_t aad_length,
 		uint8_t initial_vector[TO_AESGCM_INITIALVECTOR_SIZE],
-		uint8_t* cryptogram,
+		uint8_t *cryptogram,
+		uint16_t *cryptogram_length,
 		uint8_t tag[TO_AESGCM_TAG_SIZE]
 ) {
-	DRV_CALL_CHECK(ctx, aes_encrypt, aes128gcm_encrypt, GET_PRIV_CTX(ctx), key_index, data, data_length, aad, aad_length, initial_vector, cryptogram, tag)
+	DRV_CALL_CHECK(ctx, aes_encrypt, aes128gcm_encrypt, GET_PRIV_CTX(ctx), key_index, data, data_length, aad, aad_length, initial_vector, cryptogram, cryptogram_length, tag)
 }
 TO_ret_t TOSE_aes128gcm_decrypt(
 		TOSE_ctx_t *ctx,
 		const uint8_t key_index,
 		const uint8_t initial_vector[TO_AESGCM_INITIALVECTOR_SIZE],
-		const uint8_t* aad,
+		const uint8_t *aad,
 		const uint16_t aad_length,
-		const uint8_t* cryptogram,
+		const uint8_t *cryptogram,
 		const uint16_t cryptogram_length,
 		const uint8_t tag[TO_AESGCM_TAG_SIZE],
-		uint8_t* data
+		uint8_t *data,
+		uint16_t *data_length
 ) {
-	DRV_CALL_CHECK(ctx, aes_encrypt, aes128gcm_decrypt, GET_PRIV_CTX(ctx), key_index, initial_vector, aad, aad_length, cryptogram, cryptogram_length, tag, data)
+	DRV_CALL_CHECK(ctx, aes_encrypt, aes128gcm_decrypt, GET_PRIV_CTX(ctx), key_index, initial_vector, aad, aad_length, cryptogram, cryptogram_length, tag, data, data_length)
 }
 TO_ret_t TOSE_aes128ccm_encrypt(
 		TOSE_ctx_t *ctx,
 		const uint8_t key_index,
-		const uint8_t* data,
+		const uint8_t *data,
 		const uint16_t data_length,
-		const uint8_t* aad,
+		const uint8_t *aad,
 		const uint16_t aad_length,
 		uint8_t nonce[TO_AESCCM_NONCE_SIZE],
-		uint8_t* cryptogram,
+		uint8_t *cryptogram,
+		uint16_t *cryptogram_length,
 		uint8_t tag[TO_AESCCM_TAG_SIZE]
 ) {
-	DRV_CALL_CHECK(ctx, aes_encrypt, aes128ccm_encrypt, GET_PRIV_CTX(ctx), key_index, data, data_length, aad, aad_length, nonce, cryptogram, tag)
+	DRV_CALL_CHECK(ctx, aes_encrypt, aes128ccm_encrypt, GET_PRIV_CTX(ctx), key_index, data, data_length, aad, aad_length, nonce, cryptogram, cryptogram_length, tag)
 }
 TO_ret_t TOSE_aes128ccm_decrypt(
 		TOSE_ctx_t *ctx,
 		const uint8_t key_index,
 		const uint8_t nonce[TO_AESCCM_NONCE_SIZE],
-		const uint8_t* aad,
+		const uint8_t *aad,
 		const uint16_t aad_length,
-		const uint8_t* cryptogram,
+		const uint8_t *cryptogram,
 		const uint16_t cryptogram_length,
 		const uint8_t tag[TO_AESCCM_TAG_SIZE],
-		uint8_t* data
+		uint8_t *data,
+		uint16_t *data_length
 ) {
-	DRV_CALL_CHECK(ctx, aes_encrypt, aes128ccm_decrypt, GET_PRIV_CTX(ctx), key_index, nonce, aad, aad_length, cryptogram, cryptogram_length, tag, data)
+	DRV_CALL_CHECK(ctx, aes_encrypt, aes128ccm_decrypt, GET_PRIV_CTX(ctx), key_index, nonce, aad, aad_length, cryptogram, cryptogram_length, tag, data, data_length)
 }
 TO_ret_t TOSE_aes128ecb_encrypt(
 		TOSE_ctx_t *ctx,
 		const uint8_t key_index,
-		const uint8_t* data,
+		const uint8_t *data,
 		const uint16_t data_length,
-		uint8_t* cryptogram
+		uint8_t *cryptogram,
+		uint16_t *cryptogram_length
 ) {
-	DRV_CALL_CHECK(ctx, aes_encrypt, aes128ecb_encrypt, GET_PRIV_CTX(ctx), key_index, data, data_length, cryptogram)
+	DRV_CALL_CHECK(ctx, aes_encrypt, aes128ecb_encrypt, GET_PRIV_CTX(ctx), key_index, data, data_length, cryptogram, cryptogram_length)
 }
 TO_ret_t TOSE_aes128ecb_decrypt(
 		TOSE_ctx_t *ctx,
 		const uint8_t key_index,
-		const uint8_t* cryptogram,
+		const uint8_t *cryptogram,
 		const uint16_t cryptogram_length,
-		uint8_t* data
+		uint8_t *data,
+		uint16_t *data_length
 ) {
-	DRV_CALL_CHECK(ctx, aes_encrypt, aes128ecb_decrypt, GET_PRIV_CTX(ctx), key_index, cryptogram, cryptogram_length, data)
+	DRV_CALL_CHECK(ctx, aes_encrypt, aes128ecb_decrypt, GET_PRIV_CTX(ctx), key_index, cryptogram, cryptogram_length, data, data_length)
 }
 TO_ret_t TOSE_compute_hmac(
 		TOSE_ctx_t *ctx,
 		const uint8_t key_index,
 		const uint8_t* data,
 		const uint16_t data_length,
-		uint8_t hmac_data[TO_HMAC_SIZE]
+		uint8_t *hmac,
+		uint16_t *hmac_length
 ) {
-	DRV_CALL_CHECK(ctx, hmac, compute_hmac, GET_PRIV_CTX(ctx), key_index, data, data_length, hmac_data)
+	DRV_CALL_CHECK(ctx, hmac, compute_hmac, GET_PRIV_CTX(ctx), key_index, data, data_length, hmac, hmac_length)
 }
 TO_ret_t TOSE_compute_hmac_init(
 		TOSE_ctx_t *ctx,
@@ -363,18 +378,19 @@ TO_ret_t TOSE_compute_hmac_update(
 }
 TO_ret_t TOSE_compute_hmac_final(
 		TOSE_ctx_t *ctx,
-		uint8_t hmac[TO_HMAC_SIZE]
+		uint8_t *hmac,
+		uint16_t *hmac_length
 ) {
-	DRV_CALL_CHECK(ctx, hmac, compute_hmac_final, GET_PRIV_CTX(ctx), hmac)
+	DRV_CALL_CHECK(ctx, hmac, compute_hmac_final, GET_PRIV_CTX(ctx), hmac, hmac_length)
 }
 TO_ret_t TOSE_verify_hmac(
 		TOSE_ctx_t *ctx,
 		const uint8_t key_index,
 		const uint8_t* data,
 		const uint16_t data_length,
-		const uint8_t hmac_data[TO_HMAC_SIZE]
+		const uint8_t hmac[TO_HMAC_SIZE]
 ) {
-	DRV_CALL_CHECK(ctx, hmac, verify_hmac, GET_PRIV_CTX(ctx), key_index, data, data_length, hmac_data)
+	DRV_CALL_CHECK(ctx, hmac, verify_hmac, GET_PRIV_CTX(ctx), key_index, data, data_length, hmac)
 }
 TO_ret_t TOSE_verify_hmac_init(
 		TOSE_ctx_t *ctx,
@@ -413,85 +429,36 @@ TO_ret_t TOSE_verify_cmac(
 ) {
 	DRV_CALL_CHECK(ctx, cmac, verify_cmac, GET_PRIV_CTX(ctx), key_index, data, data_length, cmac_data)
 }
-TO_ret_t TOSE_aes128cbc_hmac_secure_message(
-		TOSE_ctx_t *ctx,
-		const uint8_t aes_key_index,
-		const uint8_t hmac_key_index,
-		const uint8_t* data,
-		const uint16_t data_length,
-		uint8_t initial_vector[TO_INITIALVECTOR_SIZE],
-		uint8_t* cryptogram,
-		uint8_t hmac[TO_HMAC_SIZE]
-) {
-	DRV_CALL_CHECK(ctx, sec_msg, aes128cbc_hmac_secure_message, GET_PRIV_CTX(ctx), aes_key_index, hmac_key_index, data, data_length, initial_vector, cryptogram, hmac)
-}
-TO_ret_t TOSE_aes128cbc_hmac_unsecure_message(
-		TOSE_ctx_t *ctx,
-		const uint8_t aes_key_index,
-		const uint8_t hmac_key_index,
-		const uint8_t initial_vector[TO_INITIALVECTOR_SIZE],
-		const uint8_t* cryptogram,
-		const uint16_t cryptogram_length,
-		const uint8_t hmac[TO_HMAC_SIZE],
-		uint8_t* data
-) {
-	DRV_CALL_CHECK(ctx, sec_msg, aes128cbc_hmac_unsecure_message, GET_PRIV_CTX(ctx), aes_key_index, hmac_key_index, initial_vector, cryptogram, cryptogram_length, hmac, data)
-}
-TO_ret_t TOSE_aes128cbc_cmac_secure_message(
-		TOSE_ctx_t *ctx,
-		const uint8_t aes_key_index,
-		const uint8_t cmac_key_index,
-		const uint8_t* data,
-		const uint16_t data_length,
-		uint8_t initial_vector[TO_INITIALVECTOR_SIZE],
-		uint8_t* cryptogram,
-		uint8_t cmac[TO_CMAC_SIZE]
-) {
-	DRV_CALL_CHECK(ctx, sec_msg, aes128cbc_cmac_secure_message, GET_PRIV_CTX(ctx), aes_key_index, cmac_key_index, data, data_length, initial_vector, cryptogram, cmac)
-}
-TO_ret_t TOSE_aes128cbc_cmac_unsecure_message(
-		TOSE_ctx_t *ctx,
-		const uint8_t aes_key_index,
-		const uint8_t cmac_key_index,
-		const uint8_t initial_vector[TO_INITIALVECTOR_SIZE],
-		const uint8_t* cryptogram,
-		const uint16_t cryptogram_length,
-		const uint8_t cmac[TO_CMAC_SIZE],
-		uint8_t* data
-) {
-	DRV_CALL_CHECK(ctx, sec_msg, aes128cbc_cmac_unsecure_message, GET_PRIV_CTX(ctx), aes_key_index, cmac_key_index, initial_vector, cryptogram, cryptogram_length, cmac, data)
-}
 TO_ret_t TOSE_secure_payload(
 		TOSE_ctx_t *ctx,
 		const uint8_t key_index,
-		const TO_enc_alg_t enc_alg,
-		const TO_mac_alg_t mac_alg,
+		const TO_secmsg_alg_t alg,
 		const uint8_t* data,
 		const uint16_t data_len,
 		uint8_t* payload,
 		uint16_t* payload_len
 ) {
-	DRV_CALL_CHECK(ctx, sec_msg, secure_payload, GET_PRIV_CTX(ctx), key_index, enc_alg, mac_alg, data, data_len, payload, payload_len)
+	DRV_CALL_CHECK(ctx, sec_msg, secure_payload, GET_PRIV_CTX(ctx), key_index, alg, data, data_len, payload, payload_len)
 }
 TO_ret_t TOSE_secure_payload_init(
 		TOSE_ctx_t *ctx,
 		const uint8_t key_index,
-		const TO_enc_alg_t enc_alg,
-		const TO_mac_alg_t mac_alg,
+		const TO_secmsg_alg_t alg,
 		const uint16_t data_len,
 		uint8_t sequence[TO_SEQUENCE_SIZE],
 		uint8_t *iv,
 		uint16_t *iv_len
 ) {
-	DRV_CALL_CHECK(ctx, sec_msg, secure_payload_init, GET_PRIV_CTX(ctx), key_index, enc_alg, mac_alg, data_len, sequence, iv, iv_len)
+	DRV_CALL_CHECK(ctx, sec_msg, secure_payload_init, GET_PRIV_CTX(ctx), key_index, alg, data_len, sequence, iv, iv_len)
 }
 TO_ret_t TOSE_secure_payload_update(
 		TOSE_ctx_t *ctx,
-		const uint8_t* data,
+		const uint8_t *data,
 		const uint16_t data_len,
-		uint8_t* cryptogram
+		uint8_t *cryptogram,
+		uint16_t *cryptogram_len
 ) {
-	DRV_CALL_CHECK(ctx, sec_msg, secure_payload_update, GET_PRIV_CTX(ctx), data, data_len, cryptogram)
+	DRV_CALL_CHECK(ctx, sec_msg, secure_payload_update, GET_PRIV_CTX(ctx), data, data_len, cryptogram, cryptogram_len)
 }
 TO_ret_t TOSE_secure_payload_final(
 		TOSE_ctx_t *ctx,
@@ -505,37 +472,34 @@ TO_ret_t TOSE_secure_payload_final(
 TO_ret_t TOSE_unsecure_payload(
 		TOSE_ctx_t *ctx,
 		const uint8_t key_index,
-		const TO_enc_alg_t enc_alg,
-		const TO_mac_alg_t mac_alg,
+		const TO_secmsg_alg_t alg,
 		const uint8_t* payload,
 		const uint16_t payload_len,
 		uint8_t* data,
 		uint16_t* data_len
 ) {
-	DRV_CALL_CHECK(ctx, sec_msg, unsecure_payload, GET_PRIV_CTX(ctx), key_index, enc_alg, mac_alg, payload, payload_len, data, data_len)
+	DRV_CALL_CHECK(ctx, sec_msg, unsecure_payload, GET_PRIV_CTX(ctx), key_index, alg, payload, payload_len, data, data_len)
 }
 TO_ret_t TOSE_unsecure_payload_init_cbc(
 		TOSE_ctx_t *ctx,
 		const uint8_t key_index,
-		const TO_enc_alg_t enc_alg,
-		const TO_mac_alg_t mac_alg,
+		const TO_secmsg_alg_t alg,
 		const uint16_t cryptogram_len,
 		const uint8_t sequence[TO_SEQUENCE_SIZE],
 		const uint8_t initial_vector[TO_INITIALVECTOR_SIZE],
 		const uint8_t last_block_iv[TO_INITIALVECTOR_SIZE],
 		const uint8_t last_block[TO_AES_BLOCK_SIZE]
 ) {
-	DRV_CALL_CHECK(ctx, sec_msg, unsecure_payload_init_cbc, GET_PRIV_CTX(ctx), key_index, enc_alg, mac_alg, cryptogram_len, sequence, initial_vector, last_block_iv, last_block)
+	DRV_CALL_CHECK(ctx, sec_msg, unsecure_payload_init_cbc, GET_PRIV_CTX(ctx), key_index, alg, cryptogram_len, sequence, initial_vector, last_block_iv, last_block)
 }
 TO_ret_t TOSE_unsecure_payload_init_aead(
 		TOSE_ctx_t *ctx,
 		const uint8_t key_index,
-		const TO_enc_alg_t enc_alg,
-		const TO_mac_alg_t mac_alg,
+		const TO_secmsg_alg_t alg,
 		const uint16_t cryptogram_len,
 		const uint8_t sequence[TO_SEQUENCE_SIZE]
 ) {
-	DRV_CALL_CHECK(ctx, sec_msg, unsecure_payload_init_aead, GET_PRIV_CTX(ctx), key_index, enc_alg, mac_alg, cryptogram_len, sequence)
+	DRV_CALL_CHECK(ctx, sec_msg, unsecure_payload_init_aead, GET_PRIV_CTX(ctx), key_index, alg, cryptogram_len, sequence)
 }
 TO_ret_t TOSE_unsecure_payload_update(
 		TOSE_ctx_t *ctx,
@@ -554,9 +518,10 @@ TO_ret_t TOSE_sign(
 		const uint8_t key_index,
 		const uint8_t* challenge,
 		const uint16_t challenge_length,
-		uint8_t signature[TO_SIGNATURE_SIZE]
+		uint8_t *signature,
+		uint16_t *signature_length
 ) {
-	DRV_CALL_CHECK(ctx, signing, sign, GET_PRIV_CTX(ctx), key_index, challenge, challenge_length, signature)
+	DRV_CALL_CHECK(ctx, signing, sign, GET_PRIV_CTX(ctx), key_index, challenge, challenge_length, signature, signature_length)
 }
 TO_ret_t TOSE_verify(
 		TOSE_ctx_t *ctx,
@@ -571,9 +536,10 @@ TO_ret_t TOSE_sign_hash(
 		TOSE_ctx_t *ctx,
 		const uint8_t key_index,
 		const uint8_t hash[TO_HASH_SIZE],
-		uint8_t signature[TO_SIGNATURE_SIZE])
-{
-	DRV_CALL_CHECK(ctx, signing, sign_hash, GET_PRIV_CTX(ctx), key_index, hash, signature)
+		uint8_t *signature,
+		uint16_t *signature_length
+) {
+	DRV_CALL_CHECK(ctx, signing, sign_hash, GET_PRIV_CTX(ctx), key_index, hash, signature, signature_length)
 }
 TO_ret_t TOSE_verify_hash_signature(
 		TOSE_ctx_t *ctx,
@@ -586,14 +552,15 @@ TO_ret_t TOSE_verify_hash_signature(
 TO_ret_t TOSE_get_certificate_subject_cn(
 		TOSE_ctx_t *ctx,
 		const uint8_t certificate_index,
-		char subject_cn[TO_CERT_SUBJECT_CN_MAXSIZE + 1]
+		char *subject_cn,
+		uint16_t *subject_cn_length
 ) {
-	DRV_CALL_CHECK(ctx, cert_mgmt, get_certificate_subject_cn, GET_PRIV_CTX(ctx), certificate_index, subject_cn)
+	DRV_CALL_CHECK(ctx, cert_mgmt, get_certificate_subject_cn, GET_PRIV_CTX(ctx), certificate_index, subject_cn, subject_cn_length)
 }
 TO_ret_t TOSE_set_certificate_signing_request_dn(
 		TOSE_ctx_t *ctx,
 		const uint8_t certificate_index,
-		const uint8_t csr_dn[TO_CERT_DN_MAXSIZE],
+		const uint8_t *csr_dn,
 		const uint16_t csr_dn_len
 ) {
 	DRV_CALL_CHECK(ctx, cert_mgmt, set_certificate_signing_request_dn, GET_PRIV_CTX(ctx), certificate_index, csr_dn, csr_dn_len)
@@ -610,17 +577,18 @@ TO_ret_t TOSE_get_certificate(
 		TOSE_ctx_t *ctx,
 		const uint8_t certificate_index,
 		const TO_certificate_format_t certificate_format,
-		uint8_t* certificate
+		uint8_t *certificate,
+		uint16_t *certificate_length
 ) {
-	DRV_CALL_CHECK(ctx, cert_mgmt, get_certificate, GET_PRIV_CTX(ctx), certificate_index, certificate_format, certificate)
+	DRV_CALL_CHECK(ctx, cert_mgmt, get_certificate, GET_PRIV_CTX(ctx), certificate_index, certificate_format, certificate, certificate_length)
 }
 TO_ret_t TOSE_get_certificate_x509(
 		TOSE_ctx_t *ctx,
 		const uint8_t certificate_index,
-		uint8_t* certificate,
-		uint16_t* size
+		uint8_t *certificate,
+		uint16_t *certificate_length
 ) {
-	DRV_CALL_CHECK(ctx, cert_mgmt, get_certificate_x509, GET_PRIV_CTX(ctx), certificate_index, certificate, size)
+	DRV_CALL_CHECK(ctx, cert_mgmt, get_certificate_x509, GET_PRIV_CTX(ctx), certificate_index, certificate, certificate_length)
 }
 TO_ret_t TOSE_set_certificate_x509(
 		TOSE_ctx_t *ctx,
@@ -655,9 +623,11 @@ TO_ret_t TOSE_get_certificate_and_sign(
 		const uint8_t* challenge,
 		const uint16_t challenge_length,
 		uint8_t* certificate,
-		uint8_t* signature
+		uint16_t *certificate_length,
+		uint8_t* signature,
+		uint16_t *signature_length
 ) {
-	DRV_CALL_CHECK(ctx, cert_mgmt, get_certificate_and_sign, GET_PRIV_CTX(ctx), certificate_index, format, challenge, challenge_length, certificate, signature)
+	DRV_CALL_CHECK(ctx, cert_mgmt, get_certificate_and_sign, GET_PRIV_CTX(ctx), certificate_index, format, challenge, challenge_length, certificate, certificate_length, signature, signature_length)
 }
 TO_ret_t TOSE_get_certificate_x509_and_sign(
 		TOSE_ctx_t *ctx,
@@ -665,10 +635,11 @@ TO_ret_t TOSE_get_certificate_x509_and_sign(
 		const uint8_t* challenge,
 		const uint16_t challenge_length,
 		uint8_t* certificate,
-		uint16_t* size,
-		uint8_t* signature
+		uint16_t* certificate_len,
+		uint8_t* signature,
+		uint16_t *signature_len
 ) {
-	DRV_CALL_CHECK(ctx, cert_mgmt, get_certificate_x509_and_sign, GET_PRIV_CTX(ctx), certificate_index, challenge, challenge_length, certificate, size, signature)
+	DRV_CALL_CHECK(ctx, cert_mgmt, get_certificate_x509_and_sign, GET_PRIV_CTX(ctx), certificate_index, challenge, challenge_length, certificate, certificate_len, signature, signature_len)
 }
 TO_ret_t TOSE_get_certificate_x509_init(
 		TOSE_ctx_t *ctx,
@@ -695,24 +666,26 @@ TO_ret_t TOSE_verify_certificate_and_store(
 		TOSE_ctx_t *ctx,
 		const uint8_t ca_key_id,
 		const TO_certificate_format_t format,
-		const uint8_t* certificate
+		const uint8_t* certificate,
+		const uint16_t certificate_length
 ) {
-	DRV_CALL_CHECK(ctx, cert_mgmt, verify_certificate_and_store, GET_PRIV_CTX(ctx), ca_key_id, format, certificate)
+	DRV_CALL_CHECK(ctx, cert_mgmt, verify_certificate_and_store, GET_PRIV_CTX(ctx), ca_key_id, format, certificate, certificate_length)
 }
 TO_ret_t TOSE_verify_ca_certificate_and_store(
 		TOSE_ctx_t *ctx,
 		const uint8_t ca_key_index,
 		const uint8_t subca_key_index,
 		const uint8_t *certificate,
-		const uint16_t certificate_len
+		const uint16_t certificate_length
 ) {
-	DRV_CALL_CHECK(ctx, cert_mgmt, verify_ca_certificate_and_store, GET_PRIV_CTX(ctx), ca_key_index, subca_key_index, certificate, certificate_len)
+	DRV_CALL_CHECK(ctx, cert_mgmt, verify_ca_certificate_and_store, GET_PRIV_CTX(ctx), ca_key_index, subca_key_index, certificate, certificate_length)
 }
 TO_ret_t TOSE_get_challenge_and_store(
 		TOSE_ctx_t *ctx,
-		uint8_t challenge[TO_CHALLENGE_SIZE]
+		uint8_t *challenge,
+		uint16_t *challenge_length
 ) {
-	DRV_CALL_CHECK(ctx, cert_mgmt, get_challenge_and_store, GET_PRIV_CTX(ctx), challenge)
+	DRV_CALL_CHECK(ctx, cert_mgmt, get_challenge_and_store, GET_PRIV_CTX(ctx), challenge, challenge_length)
 }
 TO_ret_t TOSE_verify_challenge_signature(
 		TOSE_ctx_t *ctx,
@@ -806,11 +779,11 @@ TO_ret_t TOSE_get_tls_master_secret(
 }
 TO_ret_t TOSE_get_tls_master_secret_derived_keys(
 		TOSE_ctx_t *ctx,
-		uint8_t key_block_length,
-		uint8_t *key_block
+		uint8_t *key_block,
+		uint8_t *key_block_length
 ) {
 	DRV_CALL_CHECK(ctx, tls, get_tls_master_secret_derived_keys,
-			GET_PRIV_CTX(ctx), key_block_length, key_block)
+			GET_PRIV_CTX(ctx), key_block, key_block_length)
 }
 TO_ret_t TOSE_renew_tls_keys_ecdhe(
 		TOSE_ctx_t *ctx,
@@ -905,55 +878,55 @@ extern TO_ret_t TOSE_tls_get_client_hello_final(TOSE_ctx_t *ctx,
 TO_ret_t TOSE_tls_handle_hello_verify_request(
 		TOSE_ctx_t *ctx,
 		const uint8_t *hello_verify_request,
-		const uint32_t hello_verify_request_len
+		const uint16_t hello_verify_request_len
 ) {
 	DRV_CALL_CHECK(ctx, tls, tls_handle_hello_verify_request, GET_PRIV_CTX(ctx), hello_verify_request, hello_verify_request_len)
 }
 TO_ret_t TOSE_tls_handle_server_hello(
 		TOSE_ctx_t *ctx,
 		const uint8_t *server_hello,
-		const uint32_t server_hello_len
+		const uint16_t server_hello_len
 ) {
 	DRV_CALL_CHECK(ctx, tls, tls_handle_server_hello, GET_PRIV_CTX(ctx), server_hello, server_hello_len)
 }
 TO_ret_t TOSE_tls_handle_server_hello_init(
 		TOSE_ctx_t *ctx,
-		const uint32_t server_hello_len
+		const uint16_t server_hello_len
 ) {
 	DRV_CALL_CHECK(ctx, tls, tls_handle_server_hello_init, GET_PRIV_CTX(ctx), server_hello_len)
 }
 TO_ret_t TOSE_tls_handle_server_hello_update(
 		TOSE_ctx_t *ctx,
 		const uint8_t *data,
-		const uint32_t part_len
+		const uint16_t part_len
 ) {
 	DRV_CALL_CHECK(ctx, tls, tls_handle_server_hello_update, GET_PRIV_CTX(ctx), data, part_len)
 }
 TO_ret_t TOSE_tls_handle_server_hello_final(
 		TOSE_ctx_t *ctx,
 		const uint8_t *data,
-		const uint32_t final_len
+		const uint16_t final_len
 ) {
 	DRV_CALL_CHECK(ctx, tls, tls_handle_server_hello_final, GET_PRIV_CTX(ctx), data, final_len)
 }
 TO_ret_t TOSE_tls_handle_server_certificate(
 		TOSE_ctx_t *ctx,
 		const uint8_t *server_certificate,
-		const uint32_t server_certificate_len
+		const uint16_t server_certificate_len
 ) {
 	DRV_CALL_CHECK(ctx, tls, tls_handle_server_certificate, GET_PRIV_CTX(ctx), server_certificate, server_certificate_len)
 }
 TO_ret_t TOSE_tls_handle_server_certificate_init(
 		TOSE_ctx_t *ctx,
 		const uint8_t *server_certificate_init,
-		const uint32_t server_certificate_init_len
+		const uint16_t server_certificate_init_len
 ) {
 	DRV_CALL_CHECK(ctx, tls, tls_handle_server_certificate_init, GET_PRIV_CTX(ctx), server_certificate_init, server_certificate_init_len)
 }
 TO_ret_t TOSE_tls_handle_server_certificate_update(
 		TOSE_ctx_t *ctx,
 		const uint8_t *server_certificate_update,
-		const uint32_t server_certificate_update_len
+		const uint16_t server_certificate_update_len
 ) {
 	DRV_CALL_CHECK(ctx, tls, tls_handle_server_certificate_update, GET_PRIV_CTX(ctx), server_certificate_update, server_certificate_update_len)
 }
@@ -963,21 +936,21 @@ TO_ret_t TOSE_tls_handle_server_certificate_final(TOSE_ctx_t *ctx) {
 TO_ret_t TOSE_tls_handle_server_key_exchange(
 		TOSE_ctx_t *ctx,
 		const uint8_t *server_key_exchange,
-		const uint32_t server_key_exchange_len
+		const uint16_t server_key_exchange_len
 ) {
 	DRV_CALL_CHECK(ctx, tls, tls_handle_server_key_exchange, GET_PRIV_CTX(ctx), server_key_exchange, server_key_exchange_len)
 }
 TO_ret_t TOSE_tls_handle_server_key_exchange_init(
 		TOSE_ctx_t *ctx,
 		const uint8_t *server_key_exchange_init,
-		const uint32_t server_key_exchange_init_len
+		const uint16_t server_key_exchange_init_len
 ) {
 	DRV_CALL_CHECK(ctx, tls, tls_handle_server_key_exchange_init, GET_PRIV_CTX(ctx), server_key_exchange_init, server_key_exchange_init_len)
 }
 TO_ret_t TOSE_tls_handle_server_key_exchange_update(
 		TOSE_ctx_t *ctx,
 		const uint8_t *server_key_exchange_update,
-		const uint32_t server_key_exchange_update_len
+		const uint16_t server_key_exchange_update_len
 ) {
 	DRV_CALL_CHECK(ctx, tls, tls_handle_server_key_exchange_update, GET_PRIV_CTX(ctx), server_key_exchange_update, server_key_exchange_update_len)
 }
@@ -987,21 +960,21 @@ TO_ret_t TOSE_tls_handle_server_key_exchange_final(TOSE_ctx_t *ctx) {
 TO_ret_t TOSE_tls_handle_mediator_certificate(
 		TOSE_ctx_t *ctx,
 		const uint8_t *mediator_certificate,
-		const uint32_t mediator_certificate_len
+		const uint16_t mediator_certificate_len
 ) {
 	DRV_CALL_CHECK(ctx, tls, tls_handle_mediator_certificate, GET_PRIV_CTX(ctx), mediator_certificate, mediator_certificate_len)
 }
 TO_ret_t TOSE_tls_handle_certificate_request(
 		TOSE_ctx_t *ctx,
 		const uint8_t *certificate_request,
-		const uint32_t certificate_request_len
+		const uint16_t certificate_request_len
 ) {
 	DRV_CALL_CHECK(ctx, tls, tls_handle_certificate_request, GET_PRIV_CTX(ctx), certificate_request, certificate_request_len)
 }
 TO_ret_t TOSE_tls_handle_server_hello_done(
 		TOSE_ctx_t *ctx,
 		const uint8_t *server_hello_done,
-		const uint32_t server_hello_done_len
+		const uint16_t server_hello_done_len
 ) {
 	DRV_CALL_CHECK(ctx, tls, tls_handle_server_hello_done, GET_PRIV_CTX(ctx), server_hello_done, server_hello_done_len)
 }
@@ -1060,14 +1033,14 @@ TO_ret_t TOSE_tls_get_finished(
 TO_ret_t TOSE_tls_handle_change_cipher_spec(
 		TOSE_ctx_t *ctx,
 		const uint8_t *change_cipher_spec,
-		const uint32_t change_cipher_spec_len
+		const uint16_t change_cipher_spec_len
 ) {
 	DRV_CALL_CHECK(ctx, tls, tls_handle_change_cipher_spec, GET_PRIV_CTX(ctx), change_cipher_spec, change_cipher_spec_len)
 }
 TO_ret_t TOSE_tls_handle_finished(
 		TOSE_ctx_t *ctx,
 		const uint8_t *finished,
-		const uint32_t finished_len
+		const uint16_t finished_len
 ) {
 	DRV_CALL_CHECK(ctx, tls, tls_handle_finished, GET_PRIV_CTX(ctx), finished, finished_len)
 }
@@ -1108,9 +1081,10 @@ TO_ret_t TOSE_tls_secure_payload_update(
 		TOSE_ctx_t *ctx,
 		const uint8_t* data,
 		const uint16_t data_len,
-		uint8_t *cryptogram
+		uint8_t *cryptogram,
+		uint16_t *cryptogram_len
 ) {
-	DRV_CALL_CHECK(ctx, tls, tls_secure_payload_update, GET_PRIV_CTX(ctx), data, data_len, cryptogram)
+	DRV_CALL_CHECK(ctx, tls, tls_secure_payload_update, GET_PRIV_CTX(ctx), data, data_len, cryptogram, cryptogram_len)
 }
 TO_ret_t TOSE_tls_secure_payload_final(
 		TOSE_ctx_t *ctx,
@@ -1338,10 +1312,10 @@ TO_ret_t TOSE_get_status_PIO_config(
 }
 TO_ret_t TOSE_get_random(
 		TOSE_ctx_t *ctx,
-		const uint16_t random_length,
-		uint8_t* random
+		uint8_t* random,
+		const uint16_t random_length
 ) {
-	DRV_CALL_CHECK(ctx, random, get_random, GET_PRIV_CTX(ctx), random_length, random)
+	DRV_CALL_CHECK(ctx, random, get_random, GET_PRIV_CTX(ctx), random, random_length)
 }
 TO_ret_t TOSE_loader_broadcast_get_info(
 		TOSE_ctx_t *ctx,

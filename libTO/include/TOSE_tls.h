@@ -113,8 +113,8 @@ extern TO_ret_t TOSE_get_tls_master_secret(TOSE_ctx_t *ctx,
 /**
  * @brief Get TLS master secret derived keys.
  * @param ctx SE context
- * @param[in] key_block_length length of the derived key block, value 0 means a length of 256
  * @param[out] key_block buffer with keys derivation
+ * @param[in/out] key_block_length length of the derived key block
  *
  * Request the Secure Element to derive TLS keys from the master secret and return them
  *
@@ -127,8 +127,8 @@ extern TO_ret_t TOSE_get_tls_master_secret(TOSE_ctx_t *ctx,
  * - TO_ERROR: generic error
  */
 extern TO_ret_t TOSE_get_tls_master_secret_derived_keys(TOSE_ctx_t *ctx,
-		uint8_t key_block_length,
-		uint8_t key_block[]);
+		uint8_t *key_block,
+		uint8_t *key_block_length);
 
 /**
  * @brief Derive master secret.
@@ -276,8 +276,10 @@ extern TO_ret_t TOSE_tls_set_cid_ext_id(TOSE_ctx_t *ctx,
  * @brief Generates the TLS Client_Hello (client) message
  * @param[in] ctx Pointer to the SE context
  * @param[in] timestamp Timestamp (seconds since epoch)
- * @param[out] client_hello Pointer to a buffer receiving the ClientHello payload (up to 79 bytes in TLS, 120 bytes in DTLS)
- * @param[out] client_hello_len Pointer to receive the ClientHello payload length
+ * @param[out] client_hello Pointer to a buffer receiving the ClientHello payload
+ * @param[in,out] client_hello_len Pointer to an integer indicating the available bytes
+ * to receive the ClientHello payload length. Provides the real number of bytes used to store the client_hello message.
+ * Providing a a pointer to a zero integer enables to retrieve the needed buffer size.
  * @details
  * When a client first connects to a server, it is required to send
  * the ClientHello as its first message.  The client can also send a
@@ -287,6 +289,8 @@ extern TO_ret_t TOSE_tls_set_cid_ext_id(TOSE_ctx_t *ctx,
  * @cond libTO
  * @return
  * - TORSP_SUCCESS on success
+ * - TORSP_INVALID_OUTPUT_LEN if the number of bytes provided to store the
+ * message are not enough, or the client_hello_len pointer is NULL.
  * - TO_DEVICE_WRITE_ERROR: error writing data to Secure Element
  * - TO_DEVICE_READ_ERROR: error reading data from Secure Element
  * - TO_INVALID_RESPONSE_LENGTH: unexpected response length from device
@@ -299,30 +303,38 @@ extern TO_ret_t TOSE_tls_get_client_hello(TOSE_ctx_t *ctx,
 		uint8_t *client_hello,
 		uint16_t *client_hello_len);
 
-/* XXX to remove */
 /**
- * @brief Get TLS ClientHello with extension
- * @param[in,out] ctx SE context
+ * @brief Generates the TLS Client_Hello (client) message with extension
+ * @param[in,out] ctx Pointer to the SE context
  * @param[in] timestamp Timestamp (seconds since epoch)
  * @param[in] ext_data extension data
  * @param[in] ext_length extension length
- * @param[out] client_hello ClientHello payload
- * @param[out] client_hello_len ClientHello payload length
- *
- * Return the TLS handshake payload of the standard TLS “ClientHello” message.
- * This payload must be encapsulated in a TLS record.
- * The length of the response can be different depending on the use case.
+ * @param[out] client_hello Pointer to a buffer receiving the ClientHello payload
+ * @param[in,out] client_hello_len Pointer to an integer indicating the available bytes
+ * to receive the ClientHello payload length. Provides the real number of bytes used to store the client_hello message.
+ * Providing a a pointer to a zero integer enables to retrieve the needed buffer size.
+ * @details
+ * When a client first connects to a server, it is required to send
+ * the ClientHello as its first message.  The client can also send a
+ * ClientHello in response to a HelloRequest or on its own initiative
+ * in order to renegotiate the security parameters in an existing
+ * connection.
  *
  * @retval TORSP_SUCCESS on success
+ * - TORSP_INVALID_OUTPUT_LEN if the number of bytes provided to store the
+ * message are not enough, or the client_hello_len pointer is NULL.
  * @retval TO_DEVICE_WRITE_ERROR: error writing data to Secure Element
  * @retval TO_DEVICE_READ_ERROR: error reading data from Secure Element
  * @retval TO_INVALID_RESPONSE_LENGTH: unexpected response length from device
  * @retval TO_MEMORY_ERROR: internal I/O buffer overflow
  * @retval TO_ERROR: generic error
  */
-extern TO_ret_t TOSE_tls_get_client_hello_ext(TOSE_ctx_t *ctx, const uint8_t timestamp[TO_TIMESTAMP_SIZE],
-		const uint8_t *ext_data, uint16_t ext_length,
-		uint8_t *client_hello, uint16_t *client_hello_len);
+extern TO_ret_t TOSE_tls_get_client_hello_ext(TOSE_ctx_t *ctx,
+		const uint8_t timestamp[TO_TIMESTAMP_SIZE],
+		const uint8_t *ext_data,
+		uint16_t ext_length,
+		uint8_t *client_hello,
+		uint16_t *client_hello_len);
 
 /**
  * @brief Get TLS ClientHello - CAPI version - Init
@@ -408,7 +420,7 @@ extern TO_ret_t TOSE_tls_get_client_hello_final(TOSE_ctx_t *ctx, uint8_t *data);
  */
 extern TO_ret_t TOSE_tls_handle_hello_verify_request(TOSE_ctx_t *ctx,
 		const uint8_t *hello_verify_request,
-		const uint32_t hello_verify_request_len);
+		const uint16_t hello_verify_request_len);
 
 /**
  * @brief Handles the ServerHello (server) message
@@ -432,7 +444,7 @@ extern TO_ret_t TOSE_tls_handle_hello_verify_request(TOSE_ctx_t *ctx,
  */
 extern TO_ret_t TOSE_tls_handle_server_hello(TOSE_ctx_t *ctx,
 		const uint8_t *server_hello,
-		const uint32_t server_hello_len);
+		const uint16_t server_hello_len);
 
 /**
  * @brief Handle TLS ServerHello - CAPI version - Init
@@ -450,7 +462,7 @@ extern TO_ret_t TOSE_tls_handle_server_hello(TOSE_ctx_t *ctx,
  * @retval TO_ERROR: generic error
  */
 extern TO_ret_t TOSE_tls_handle_server_hello_init(TOSE_ctx_t *ctx,
-		const uint32_t server_hello_len);
+		const uint16_t server_hello_len);
 
 /**
  * @brief Handle TLS ServerHello - CAPI version - Update
@@ -470,7 +482,7 @@ extern TO_ret_t TOSE_tls_handle_server_hello_init(TOSE_ctx_t *ctx,
  */
 extern TO_ret_t TOSE_tls_handle_server_hello_update(TOSE_ctx_t *ctx,
 		const uint8_t *data,
-		const uint32_t part_len);
+		const uint16_t part_len);
 
 /**
  * @brief Handle TLS ServerHello - CAPI version - Final
@@ -490,7 +502,7 @@ extern TO_ret_t TOSE_tls_handle_server_hello_update(TOSE_ctx_t *ctx,
  */
 extern TO_ret_t TOSE_tls_handle_server_hello_final(TOSE_ctx_t *ctx,
 		const uint8_t *data,
-		const uint32_t last_len);
+		const uint16_t last_len);
 
 /**
  * @brief Handles the TLS Certificate (server) message
@@ -514,7 +526,7 @@ extern TO_ret_t TOSE_tls_handle_server_hello_final(TOSE_ctx_t *ctx,
  */
 extern TO_ret_t TOSE_tls_handle_server_certificate(TOSE_ctx_t *ctx,
 		const uint8_t *server_certificate,
-		const uint32_t server_certificate_len);
+		const uint16_t server_certificate_len);
 
 /**
  * @brief Handles the TLS Server Certificate header (server)
@@ -541,7 +553,7 @@ extern TO_ret_t TOSE_tls_handle_server_certificate(TOSE_ctx_t *ctx,
  */
 extern TO_ret_t TOSE_tls_handle_server_certificate_init(TOSE_ctx_t *ctx,
 		const uint8_t *server_certificate_init,
-		const uint32_t server_certificate_init_len);
+		const uint16_t server_certificate_init_len);
 
 /**
  * @brief Handles the TLS Server Certificate partial payload (server)
@@ -569,7 +581,7 @@ extern TO_ret_t TOSE_tls_handle_server_certificate_init(TOSE_ctx_t *ctx,
  */
 extern TO_ret_t TOSE_tls_handle_server_certificate_update(TOSE_ctx_t *ctx,
 		const uint8_t *server_certificate_update,
-		const uint32_t server_certificate_update_len);
+		const uint16_t server_certificate_update_len);
 
 /**
  * @brief Finishes the TLS Server Certificate handling (server)
@@ -612,7 +624,7 @@ extern TO_ret_t TOSE_tls_handle_server_certificate_final(TOSE_ctx_t *ctx);
  */
 extern TO_ret_t TOSE_tls_handle_server_key_exchange(TOSE_ctx_t *ctx,
 		const uint8_t *server_key_exchange,
-		const uint32_t server_key_exchange_len);
+		const uint16_t server_key_exchange_len);
 
 /**
  * @brief Handles the TLS Server ServerKeyExchange (server) header
@@ -632,7 +644,7 @@ extern TO_ret_t TOSE_tls_handle_server_key_exchange(TOSE_ctx_t *ctx,
  */
 extern TO_ret_t TOSE_tls_handle_server_key_exchange_init(TOSE_ctx_t *ctx,
 		const uint8_t *server_key_exchange_init,
-		const uint32_t server_key_exchange_init_len);
+		const uint16_t server_key_exchange_init_len);
 
 /**
  * @brief Handles the TLS Server ServerKeyExchange partial payload (server)
@@ -651,7 +663,7 @@ extern TO_ret_t TOSE_tls_handle_server_key_exchange_init(TOSE_ctx_t *ctx,
  */
 extern TO_ret_t TOSE_tls_handle_server_key_exchange_update(TOSE_ctx_t *ctx,
 		const uint8_t *server_key_exchange_update,
-		const uint32_t server_key_exchange_update_len);
+		const uint16_t server_key_exchange_update_len);
 
 /**
  * @brief Finishes TLS Server ServerKeyExchange handling (server)
@@ -691,7 +703,7 @@ extern TO_ret_t TOSE_tls_handle_server_key_exchange_final(TOSE_ctx_t *ctx);
  */
 extern TO_ret_t TOSE_tls_handle_certificate_request(TOSE_ctx_t *ctx,
 		const uint8_t *certificate_request,
-		const uint32_t certificate_request_len);
+		const uint16_t certificate_request_len);
 
 /**
  * @brief Handles the DTLS ServerHelloDone (server) message
@@ -711,7 +723,7 @@ extern TO_ret_t TOSE_tls_handle_certificate_request(TOSE_ctx_t *ctx,
  */
 extern TO_ret_t TOSE_tls_handle_server_hello_done(TOSE_ctx_t *ctx,
 		const uint8_t *server_hello_done,
-		const uint32_t server_hello_done_len);
+		const uint16_t server_hello_done_len);
 
 /**
  * @brief Generates the TLS Certificate (client) message
@@ -915,7 +927,7 @@ extern TO_ret_t TOSE_tls_get_finished(TOSE_ctx_t *ctx,
  */
 extern TO_ret_t TOSE_tls_handle_change_cipher_spec(TOSE_ctx_t *ctx,
 		const uint8_t *change_cipher_spec,
-		const uint32_t change_cipher_spec_len);
+		const uint16_t change_cipher_spec_len);
 
 /**
  * @brief Handles the TLS Finished (server) message
@@ -942,7 +954,7 @@ extern TO_ret_t TOSE_tls_handle_change_cipher_spec(TOSE_ctx_t *ctx,
  */
 extern TO_ret_t TOSE_tls_handle_finished(TOSE_ctx_t *ctx,
 		const uint8_t *finished,
-		const uint32_t finished_len);
+		const uint16_t finished_len);
 
 /**
  * @brief Generates the TLS certificate slot used during handshake (client) message
@@ -1044,7 +1056,7 @@ extern TO_ret_t TOSE_tls_unsecure_payload(TOSE_ctx_t *ctx,
  */
 extern TO_ret_t TOSE_tls_handle_mediator_certificate(TOSE_ctx_t *ctx,
 		const uint8_t *mediator_certificate,
-		const uint32_t mediator_certificate_len);
+		const uint16_t mediator_certificate_len);
 
 
 /** @}
@@ -1099,7 +1111,7 @@ extern TO_ret_t TOSE_tls_secure_payload_init_aead(TOSE_ctx_t *ctx,
  * @param[in] ctx Pointer to the SE context
  * @param[in] data TLS data
  * @param[in] data_len TLS data length (must be 16 bytes aligned, last unaligned
- * bytes must be sent with `TO_tls_secure_payload_final`
+ * bytes must be sent with `TOSE_tls_secure_payload_final`
  * @param[out] cryptogram Secured data
  * @post Handshake must have been proceeded before calling this function.
  * @cond libTO
@@ -1115,7 +1127,8 @@ extern TO_ret_t TOSE_tls_secure_payload_init_aead(TOSE_ctx_t *ctx,
 extern TO_ret_t TOSE_tls_secure_payload_update(TOSE_ctx_t *ctx,
 		const uint8_t *data,
 		const uint16_t data_len,
-		uint8_t *cryptogram);
+		uint8_t *cryptogram,
+		uint16_t *cryptogram_len);
 
 /**
  * @brief Secure message with TLS finalization

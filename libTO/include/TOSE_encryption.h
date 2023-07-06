@@ -37,6 +37,7 @@ extern "C" {
  * @param[in] data_length Length of the data to encrypt
  * @param[out] initial_vector Initial vector
  * @param[out] cryptogram Cryptogram, sent back by the Secure Element
+ * @param[in/out] cryptogram_length Cryptogram length, give available allocated size as input, written length is sent back by the Secure Element
  *
  * As padding is not handled by the Secure Element, you must ensure that data
  * length is a multiple of 16 and is not greater than maximum length value (512
@@ -53,9 +54,9 @@ extern "C" {
  * - TO_ERROR: generic error
  */
 extern TO_ret_t TOSE_aes128cbc_encrypt(TOSE_ctx_t *ctx, const uint8_t key_index,
-		const uint8_t* data, const uint16_t data_length,
+		const uint8_t *data, const uint16_t data_length,
 		uint8_t initial_vector[TO_INITIALVECTOR_SIZE],
-		uint8_t* cryptogram);
+		uint8_t *cryptogram, uint16_t *cryptogram_length);
 
 /**
  * @brief Similar to encrypt() except that Initial Vector is
@@ -67,6 +68,7 @@ extern TO_ret_t TOSE_aes128cbc_encrypt(TOSE_ctx_t *ctx, const uint8_t key_index,
  * @param[in] data Data to encrypt
  * @param[in] data_length
  * @param[out] cryptogram Returned encrypted data
+ * @param[in/out] cryptogram_length Cryptogram length, give available allocated size as input, written length is sent back by the Secure Element
  *
  * It can be used to encrypt more than data size limit (512 bytes) by manually
  * chaining blocs of 512 bytes (see Secure Element Datasheet - "Encrypt or
@@ -86,8 +88,8 @@ extern TO_ret_t TOSE_aes128cbc_encrypt(TOSE_ctx_t *ctx, const uint8_t key_index,
  */
 extern TO_ret_t TOSE_aes128cbc_iv_encrypt(TOSE_ctx_t *ctx, const uint8_t key_index,
 		const uint8_t initial_vector[TO_INITIALVECTOR_SIZE],
-		const uint8_t* data, const uint16_t data_length,
-		uint8_t* cryptogram);
+		const uint8_t*data, const uint16_t data_length,
+		uint8_t *cryptogram, uint16_t *cryptogram_length);
 
 /**
  * @brief Decrypts data using AES128 algorithm in CBC mode of operation.
@@ -98,6 +100,7 @@ extern TO_ret_t TOSE_aes128cbc_iv_encrypt(TOSE_ctx_t *ctx, const uint8_t key_ind
  * @param[in] cryptogram Data to decrypt
  * @param[in] cryptogram_length Cryptogram length, less or equal to 512 bytes
  * @param[out] data returned decrypted data
+ * @param[in/out] data_length Decrypted data length, give available allocated size as input, written length is sent back by the Secure Element
  *
  * Requires the initial vector provided by the encryption function.
  *
@@ -116,8 +119,8 @@ extern TO_ret_t TOSE_aes128cbc_iv_encrypt(TOSE_ctx_t *ctx, const uint8_t key_ind
  */
 extern TO_ret_t TOSE_aes128cbc_decrypt(TOSE_ctx_t *ctx, const uint8_t key_index,
 		const uint8_t initial_vector[TO_INITIALVECTOR_SIZE],
-		const uint8_t* cryptogram, const uint16_t cryptogram_length,
-		uint8_t* data);
+		const uint8_t *cryptogram, const uint16_t cryptogram_length,
+		uint8_t *data, uint16_t *data_length);
 
 /**
  * @brief Encrypts data using AES128 algorithm in GCM mode of operation.
@@ -130,6 +133,7 @@ extern TO_ret_t TOSE_aes128cbc_decrypt(TOSE_ctx_t *ctx, const uint8_t key_index,
  * @param[in] aad_length Length of the additional authentication data
  * @param[out] initial_vector Initial vector
  * @param[out] cryptogram Cryptogram
+ * @param[in/out] cryptogram_length Cryptogram length, give available allocated size as input, written length is sent back by the Secure Element
  * @param[out] tag Authentication tag
  *
  * Additional authentication data length and data length can not exceed
@@ -146,10 +150,10 @@ extern TO_ret_t TOSE_aes128cbc_decrypt(TOSE_ctx_t *ctx, const uint8_t key_index,
  * - TO_ERROR: generic error
  */
 extern TO_ret_t TOSE_aes128gcm_encrypt(TOSE_ctx_t *ctx, const uint8_t key_index,
-		const uint8_t* data, const uint16_t data_length,
-		const uint8_t* aad, const uint16_t aad_length,
+		const uint8_t *data, const uint16_t data_length,
+		const uint8_t *aad, const uint16_t aad_length,
 		uint8_t initial_vector[TO_AESGCM_INITIALVECTOR_SIZE],
-		uint8_t* cryptogram, uint8_t tag[TO_AESGCM_TAG_SIZE]);
+		uint8_t *cryptogram, uint16_t *cryptogram_length, uint8_t tag[TO_AESGCM_TAG_SIZE]);
 
 /**
  * @brief Decrypts data using AES128 algorithm in GCM mode of operation.
@@ -163,6 +167,7 @@ extern TO_ret_t TOSE_aes128gcm_encrypt(TOSE_ctx_t *ctx, const uint8_t key_index,
  * @param[in] cryptogram_length Cryptogram length, less or equal to 512 bytes
  * @param[in] tag Authentication tag
  * @param[out] data returned decrypted data
+ * @param[in/out] data_length Decrypted data length, give available allocated size as input, written length is sent back by the Secure Element
  *
  * Requires the initial vector provided by the encryption function.
  * Additional authentication data length and cryptogram length can not exceed
@@ -179,9 +184,9 @@ extern TO_ret_t TOSE_aes128gcm_encrypt(TOSE_ctx_t *ctx, const uint8_t key_index,
  */
 extern TO_ret_t TOSE_aes128gcm_decrypt(TOSE_ctx_t *ctx, const uint8_t key_index,
 		const uint8_t initial_vector[TO_AESGCM_INITIALVECTOR_SIZE],
-		const uint8_t* aad, const uint16_t aad_length,
-		const uint8_t* cryptogram, const uint16_t cryptogram_length,
-		const uint8_t tag[TO_AESGCM_TAG_SIZE], uint8_t* data);
+		const uint8_t *aad, const uint16_t aad_length,
+		const uint8_t *cryptogram, const uint16_t cryptogram_length,
+		const uint8_t tag[TO_AESGCM_TAG_SIZE], uint8_t *data, uint16_t *data_length);
 
 /**
  * @brief Encrypts data using AES128 algorithm in CCM mode of operation.
@@ -194,6 +199,7 @@ extern TO_ret_t TOSE_aes128gcm_decrypt(TOSE_ctx_t *ctx, const uint8_t key_index,
  * @param[in] aad_length Length of the additional authentication data
  * @param[in] nonce Nonce
  * @param[out] cryptogram Cryptogram
+ * @param[in/out] cryptogram_length Cryptogram length, give available allocated size as input, written length is sent back by the Secure Element
  * @param[out] tag Authentication tag
  *
  * Additional authentication data length and data length can not exceed
@@ -210,10 +216,10 @@ extern TO_ret_t TOSE_aes128gcm_decrypt(TOSE_ctx_t *ctx, const uint8_t key_index,
  * - TO_ERROR: generic error
  */
 extern TO_ret_t TOSE_aes128ccm_encrypt(TOSE_ctx_t *ctx, const uint8_t key_index,
-		const uint8_t* data, const uint16_t data_length,
-		const uint8_t* aad, const uint16_t aad_length,
+		const uint8_t *data, const uint16_t data_length,
+		const uint8_t *aad, const uint16_t aad_length,
 		uint8_t nonce[TO_AESCCM_NONCE_SIZE],
-		uint8_t* cryptogram, uint8_t tag[TO_AESCCM_TAG_SIZE]);
+		uint8_t *cryptogram, uint16_t *cryptogram_length, uint8_t tag[TO_AESCCM_TAG_SIZE]);
 
 /**
  * @brief Decrypts data using AES128 algorithm in CCM mode of operation.
@@ -227,6 +233,7 @@ extern TO_ret_t TOSE_aes128ccm_encrypt(TOSE_ctx_t *ctx, const uint8_t key_index,
  * @param[in] cryptogram_length Cryptogram length, less or equal to 512 bytes
  * @param[in] tag Authentication tag
  * @param[out] data returned decrypted data
+ * @param[in/out] data_length Decrypted data length, give available allocated size as input, written length is sent back by the Secure Element
  *
  * Requires the nonce provided by the encryption function.
  * Additional authentication data length and cryptogram length can not exceed
@@ -243,9 +250,9 @@ extern TO_ret_t TOSE_aes128ccm_encrypt(TOSE_ctx_t *ctx, const uint8_t key_index,
  */
 extern TO_ret_t TOSE_aes128ccm_decrypt(TOSE_ctx_t *ctx, const uint8_t key_index,
 		const uint8_t nonce[TO_AESCCM_NONCE_SIZE],
-		const uint8_t* aad, const uint16_t aad_length,
-		const uint8_t* cryptogram, const uint16_t cryptogram_length,
-		const uint8_t tag[TO_AESCCM_TAG_SIZE], uint8_t* data);
+		const uint8_t *aad, const uint16_t aad_length,
+		const uint8_t *cryptogram, const uint16_t cryptogram_length,
+		const uint8_t tag[TO_AESCCM_TAG_SIZE], uint8_t *data, uint16_t *data_length);
 
 /**
  * @brief Encrypts data using AES128 algorithm in ECB mode of
@@ -256,6 +263,7 @@ extern TO_ret_t TOSE_aes128ccm_decrypt(TOSE_ctx_t *ctx, const uint8_t key_index,
  * @param[in] data Data to encrypt
  * @param[in] data_length Length of the data to encrypt
  * @param[out] cryptogram Cryptogram
+ * @param[in/out] cryptogram_length Cryptogram length, give available allocated size as input, written length is sent back by the Secure Element
  *
  * As padding is not handled by the Secure Element, you must ensure that data
  * length is a multiple of 16 and is not greater than maximum length value (512
@@ -271,8 +279,8 @@ extern TO_ret_t TOSE_aes128ccm_decrypt(TOSE_ctx_t *ctx, const uint8_t key_index,
  * - TO_ERROR: generic error
  */
 extern TO_ret_t TOSE_aes128ecb_encrypt(TOSE_ctx_t *ctx, const uint8_t key_index,
-		const uint8_t* data, const uint16_t data_length,
-		uint8_t* cryptogram);
+		const uint8_t *data, const uint16_t data_length,
+		uint8_t *cryptogram, uint16_t *cryptogram_length);
 
 /**
  * @brief Decrypts data using AES128 algorithm in ECB mode of operation.
@@ -282,6 +290,7 @@ extern TO_ret_t TOSE_aes128ecb_encrypt(TOSE_ctx_t *ctx, const uint8_t key_index,
  * @param[in] cryptogram Data to decrypt
  * @param[in] cryptogram_length Cryptogram length, less or equal to 512 bytes
  * @param[out] data returned decrypted data
+ * @param[in/out] data_length Decrypted data length, give available allocated size as input, written length is sent back by the Secure Element
  *
  * Padding is not handled by Secure Element firmware. It gives the possibility
  * to avoid the case of a full padding block sometime required by padding
@@ -297,8 +306,8 @@ extern TO_ret_t TOSE_aes128ecb_encrypt(TOSE_ctx_t *ctx, const uint8_t key_index,
  * - TO_ERROR: generic error
  */
 extern TO_ret_t TOSE_aes128ecb_decrypt(TOSE_ctx_t *ctx, const uint8_t key_index,
-		const uint8_t* cryptogram, const uint16_t cryptogram_length,
-		uint8_t* data);
+		const uint8_t *cryptogram, const uint16_t cryptogram_length,
+		uint8_t *data, uint16_t *data_length);
 
 /** @} */
 

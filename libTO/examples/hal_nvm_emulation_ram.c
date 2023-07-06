@@ -27,7 +27,7 @@ TO_lib_ret_t TODRV_SSE_secure_storage_load(uint8_t *dst,
 		uint32_t src_offset,
 		uint32_t size)
 {
-	TO_LOG_ERR("\nLoad offset %d, size %d, dst %p.", src_offset, size, dst);
+	TO_LOG_INF("\nLoad offset %d, size %d, dst %p.", src_offset, size, dst);
 	if (src_offset + size > sizeof(nvm)) {
 		TO_LOG_ERR("Sorry, but nvm is too short ! (offset %d, size %d, nvm is %d).", src_offset, size, sizeof(nvm));
 	} else {
@@ -42,7 +42,7 @@ TO_lib_ret_t TODRV_SSE_secure_storage_store(uint32_t dst_offset,
 		const uint8_t *src,
 		uint32_t size)
 {
-	TO_LOG_ERR("\nStore offset %d, size %d, src %p.", dst_offset, size, src);
+	TO_LOG_INF("\nStore offset %d, size %d, src %p.", dst_offset, size, src);
 	if (dst_offset + size > sizeof(nvm)) {
 		TO_LOG_ERR("Sorry, but nvm is too short ! (offset %d, size %d, nvm is %d).", dst_offset, size, sizeof(nvm));
 	} else {

@@ -29,11 +29,16 @@ extern "C" {
 
 /**
  * @brief Returns the Elliptic Curve Digital Signature of the given data
- * @param[in] ctx Pointer to the SE contex
+ * @param[in] ctx Pointer to the SE context
  * @param[in] key_index Key index to use for signature
  * @param[in] challenge Challenge to be signed
  * @param[in] challenge_length Challenge length (maximum 512)
  * @param[out] signature Returned challenge signature (64 bytes)
+ * @param[in,out] signature_length Pointer to receive the signature's length (in bytes).
+ * The pointed value must be either 0, if you want the SE to return the expected length
+ * of the buffer, or the length of the buffer (signature) you pre-allocated.
+ * Providing NULL in this pointer will ge
+ * In return, will indicate the effective size of the signature as returned by the SE.
  *
  * Note that calling this function is equivalent to calling `TOSE_sha256()`
  * followed by `TOSE_sign_hash()`.
@@ -44,15 +49,19 @@ extern "C" {
  * @return
  * - TORSP_SUCCESS on success
  * - TORSP_ARG_OUT_OF_RANGE: invalid key index
+ * - TORSP_INVALID_OUTPUT_LENGTH: invalid key index
  * - TO_DEVICE_WRITE_ERROR: error writing data to Secure Element
  * - TO_DEVICE_READ_ERROR: error reading data from Secure Element
  * - TO_INVALID_RESPONSE_LENGTH: unexpected response length from device
  * - TO_MEMORY_ERROR: internal I/O buffer overflow
  * - TO_ERROR: generic error
  */
-extern TO_ret_t TOSE_sign(TOSE_ctx_t *ctx, const uint8_t key_index,
-		const uint8_t* challenge, const uint16_t challenge_length,
-		uint8_t signature[TO_SIGNATURE_SIZE]);
+extern TO_ret_t TOSE_sign(TOSE_ctx_t *ctx,
+		const uint8_t key_index,
+		const uint8_t* challenge,
+		const uint16_t challenge_length,
+		uint8_t *signature,
+		uint16_t *signature_length);
 
 /**
  * @brief Verifies the given Elliptic Curve Digital Signature of the
@@ -87,6 +96,7 @@ extern TO_ret_t TOSE_verify(TOSE_ctx_t *ctx, const uint8_t key_index,
  * @param[in] key_index Key index to use for signature
  * @param[in] hash Hash to be signed
  * @param[out] signature Returned hash signature
+ * @param[in,out] signature_length
  *
  * Signature Size is twice the size of the ECC key in bytes.
  * With a 256 bits key, signature is 64 bytes.
@@ -103,7 +113,8 @@ extern TO_ret_t TOSE_verify(TOSE_ctx_t *ctx, const uint8_t key_index,
 extern TO_ret_t TOSE_sign_hash(TOSE_ctx_t *ctx,
 		const uint8_t key_index,
 		const uint8_t hash[TO_HASH_SIZE],
-		uint8_t signature[TO_SIGNATURE_SIZE]);
+		uint8_t *signature,
+		uint16_t *signature_length);
 
 /**
  * @brief Verifies the given Elliptic Curve Digital
@@ -149,8 +160,10 @@ extern TO_ret_t TOSE_verify_hash_signature(TOSE_ctx_t *ctx, const uint8_t key_in
  * - TO_MEMORY_ERROR: internal I/O buffer overflow
  * - TO_ERROR: generic error
  */
-extern TO_ret_t TOSE_get_certificate_subject_cn(TOSE_ctx_t *ctx, const uint8_t certificate_index,
-		char subject_cn[TO_CERT_SUBJECT_CN_MAXSIZE + 1]);
+extern TO_ret_t TOSE_get_certificate_subject_cn(TOSE_ctx_t *ctx,
+		const uint8_t certificate_index,
+		char *subject_cn,
+		uint16_t *subject_cn_length);
 
 /**
  * @brief Set CSR distinguished name
@@ -186,14 +199,14 @@ extern TO_ret_t TOSE_get_certificate_subject_cn(TOSE_ctx_t *ctx, const uint8_t c
  */
 extern TO_ret_t TOSE_set_certificate_signing_request_dn(
 		TOSE_ctx_t *ctx, const uint8_t certificate_index,
-		const uint8_t csr_dn[TO_CERT_DN_MAXSIZE],
+		const uint8_t *csr_dn,
 		const uint16_t csr_dn_len);
 
 /**
  * @brief Get new certificate signing request
  * @param[in] ctx Pointer to the SE context
  * @param[in] certificate_index Certificate index to renew
- * @param[out] csr Returned CSR data 
+ * @param[out] csr Returned CSR data
  * @param[out] size Returned CSR real size
  *
  * Request a x509 DER formated certificate signing request according to the
@@ -306,9 +319,10 @@ extern TO_ret_t TOSE_set_certificate_x509_final(
  * @brief Returns one of the Secure Element certificates
  * @param[in] ctx Pointer to the SE context
  * @param[in] certificate_index Requested certificate index
+ * @param[out] certificate_format Format under which the certificate must be returned.
  * @param[out] certificate Pointer to a buffer, which will receive the
  * Certificate under the desired format.
- * @param[out] size Size of the transfered data, is returned in output.
+ * @param[in,out] certificate_length Size of the transfered data, is returned in output.
  * @details
  * Request a certificate to Secure Element according to the given index and
  * format.
@@ -326,14 +340,15 @@ extern TO_ret_t TOSE_set_certificate_x509_final(
 extern TO_ret_t TOSE_get_certificate(TOSE_ctx_t *ctx,
 		const uint8_t certificate_index,
 		const TO_certificate_format_t certificate_format,
-		uint8_t* certificate);
+		uint8_t* certificate,
+		uint16_t* certificate_length);
 
 /**
  * @brief Returns one of the certificates, x509 DER formatted
  * @param[in] ctx Pointer to the SE context
  * @param[in] certificate_index Requested certificate index
  * @param[out] certificate Returned certificate data
- * @param[out] size Size of the transfered certificate, 
+ * @param[in,out] certificate_length Size of the transfered certificate,
  * is returned in output.
  * @details
  * Request a x509 DER formated certificate according to the given index.
@@ -347,8 +362,10 @@ extern TO_ret_t TOSE_get_certificate(TOSE_ctx_t *ctx,
  * - TO_MEMORY_ERROR: internal I/O buffer overflow
  * - TO_ERROR: generic error
  */
-extern TO_ret_t TOSE_get_certificate_x509(TOSE_ctx_t *ctx, const uint8_t certificate_index,
-		uint8_t* certificate, uint16_t* size);
+extern TO_ret_t TOSE_get_certificate_x509(TOSE_ctx_t *ctx,
+		const uint8_t certificate_index,
+		uint8_t* certificate,
+		uint16_t* certificate_length);
 
 /**
  * @brief Requests to verify signature of the given subCA certificate; if
@@ -358,7 +375,7 @@ extern TO_ret_t TOSE_get_certificate_x509(TOSE_ctx_t *ctx, const uint8_t certifi
  * @param[in] ca_key_index index of the CA slot used to verify subCA
  * @param[in] subca_key_index subCA index to store certificate
  * @param[in] certificate Certificate to be verified and stored
- * @param[in] certificate_len Certificate length
+ * @param[in] certificate_length Certificate length
  *
  * Note: the only supported certificate format for this command is DER X509.
  *
@@ -371,15 +388,18 @@ extern TO_ret_t TOSE_get_certificate_x509(TOSE_ctx_t *ctx, const uint8_t certifi
  * - TO_MEMORY_ERROR: internal I/O buffer overflow
  * - TO_ERROR: generic error
  */
-extern TO_ret_t TOSE_verify_ca_certificate_and_store(TOSE_ctx_t *ctx, const uint8_t ca_key_index,
-		const uint8_t subca_key_index, const uint8_t *certificate,
-		const uint16_t certificate_len);
+extern TO_ret_t TOSE_verify_ca_certificate_and_store(TOSE_ctx_t *ctx,
+		const uint8_t ca_key_index,
+		const uint8_t subca_key_index,
+		const uint8_t *certificate,
+		const uint16_t certificate_length);
 
 /**
  * @brief Returns a challenge (random number of fixed
  * length) and store it into Secure Element memory.
  * @param[in] ctx Pointer to the SE context
  * @param[out] challenge Returned challenge
+ * @param[int,out] challenge_length Returned challenge length
  *
  * This command must be called before TOSE_verify_challenge_signature().
  *
@@ -392,7 +412,8 @@ extern TO_ret_t TOSE_verify_ca_certificate_and_store(TOSE_ctx_t *ctx, const uint
  * - TO_ERROR: generic error
  */
 extern TO_ret_t TOSE_get_challenge_and_store(TOSE_ctx_t *ctx,
-		uint8_t challenge[TO_CHALLENGE_SIZE]);
+		uint8_t *challenge,
+		uint16_t *challenge_length);
 
 /** @} */
 
@@ -424,10 +445,15 @@ extern TO_ret_t TOSE_get_challenge_and_store(TOSE_ctx_t *ctx,
  * - TO_DEVICE_READ_ERROR: error reading data from Secure Element
  * - TO_ERROR: generic error
  */
-extern TO_ret_t TOSE_get_certificate_and_sign(TOSE_ctx_t *ctx, const uint8_t certificate_index,
+TO_ret_t TOSE_get_certificate_and_sign(TOSE_ctx_t *ctx,
+		const uint8_t certificate_index,
 		const TO_certificate_format_t format,
-		const uint8_t* challenge, const uint16_t challenge_length,
-		uint8_t* certificate, uint8_t* signature);
+		const uint8_t* challenge,
+		const uint16_t challenge_length,
+		uint8_t* certificate,
+		uint16_t *certificate_length,
+		uint8_t* signature,
+		uint16_t *signature_length);
 
 /**
  * @brief Returns one of the Secure Element x509 DER formated certificates, and
@@ -455,7 +481,8 @@ extern TO_ret_t TOSE_get_certificate_and_sign(TOSE_ctx_t *ctx, const uint8_t cer
  */
 extern TO_ret_t TOSE_get_certificate_x509_and_sign(TOSE_ctx_t *ctx, const uint8_t certificate_index,
 		const uint8_t* challenge, const uint16_t challenge_length,
-		uint8_t* certificate, uint16_t* size, uint8_t* signature);
+		uint8_t* certificate, uint16_t* certificate_len,
+		uint8_t* signature, uint16_t *signature_len);
 
 /**
  * @brief CAPI version of TOSE_get_certificate_x509_and_sign(), initialization
@@ -526,6 +553,7 @@ extern TO_ret_t TOSE_get_certificate_x509_final(
  * @param[in] ca_key_id Index of the Certificate Authority public Key
  * @param[in] format Format of the certificate
  * @param[in] certificate Certificate to be verified and stored
+ * @param[in] certificate_length Certificate length
  *
  * This command is required before using TOSE_get_challenge_and_store() and
  * TOSE_verify_challenge_signature().
@@ -541,7 +569,8 @@ extern TO_ret_t TOSE_get_certificate_x509_final(
  * - TO_ERROR: generic error
  */
 extern TO_ret_t TOSE_verify_certificate_and_store(TOSE_ctx_t *ctx, const uint8_t ca_key_id,
-		const TO_certificate_format_t format, const uint8_t* certificate);
+		const TO_certificate_format_t format,
+		const uint8_t* certificate, const uint16_t certificate_length);
 
 /**
  * @brief Verifies if the given signature matches

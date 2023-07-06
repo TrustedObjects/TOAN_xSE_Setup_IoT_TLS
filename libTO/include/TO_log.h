@@ -33,11 +33,11 @@ extern "C" {
  * Log levels
  */
 
-#define TO_LOG_LEVEL_NONE	-1
-#define TO_LOG_LEVEL_ERR	0
-#define TO_LOG_LEVEL_WRN	1
-#define TO_LOG_LEVEL_INF	2
-#define TO_LOG_LEVEL_DBG	3
+#define TO_LOG_LEVEL_NONE	0
+#define TO_LOG_LEVEL_ERR	1
+#define TO_LOG_LEVEL_WRN	2
+#define TO_LOG_LEVEL_INF	3
+#define TO_LOG_LEVEL_DBG	4
 #define TO_LOG_LEVEL_MASK  	0x0f
 #define TO_LOG_STRING		0x00
 #define TO_LOG_BUFFER		0x10
@@ -62,9 +62,9 @@ typedef enum TO_log_level_e {
 	TO_LOG_HEX_DISP_WRN  = TO_LOG_LEVEL_WRN  | TO_LOG_HEX_DISP,	/**< Warning level */
 	TO_LOG_HEX_DISP_INF  = TO_LOG_LEVEL_INF  | TO_LOG_HEX_DISP,	/**< Info level */
 	TO_LOG_HEX_DISP_DBG  = TO_LOG_LEVEL_DBG  | TO_LOG_HEX_DISP,	/**< Debug level */
-	TO_LOG_ENTER         = TO_LOG_TRACE,
-	TO_LOG_EXIT          = 1 | TO_LOG_TRACE,
-	TO_LOG_RETURN        = 2 | TO_LOG_TRACE
+	TO_LOG_ENTER         = 1 | TO_LOG_TRACE,
+	TO_LOG_EXIT          = 2 | TO_LOG_TRACE,
+	TO_LOG_RETURN        = 3 | TO_LOG_TRACE
 
 } __attribute__ ((packed)) TO_log_level_t;
 
@@ -178,7 +178,7 @@ extern TO_log_ctx_t* TO_log_get_ctx(void);
 
 #if TO_LOG_LEVEL_MAX >= TO_LOG_LEVEL_DBG
 #define TO_LOG_ENTER(...) TO_log_get_ctx()->log_function(TO_log_get_ctx(), TO_LOG_ENTER, (void *)__func__)
-#define TO_LOG_RETURN(_ret) { typeof(_ret) __ret = (_ret); TO_log_get_ctx()->log_function(v, TO_LOG_RETURN, (void *)__func__, __ret, __LINE__); return __ret;}
+#define TO_LOG_RETURN(__ret) { TO_log_get_ctx()->log_function(TO_log_get_ctx(), TO_LOG_RETURN, (void *)__func__, __ret, __LINE__); return __ret;}
 #define TO_LOG_EXIT(...) TO_log_get_ctx()->log_function(TO_log_get_ctx(), TO_LOG_EXIT, (void *)__func__)
 #else
 #define TO_LOG_ENTER(...)

@@ -32,12 +32,17 @@
 
 #ifndef TOSE_DRIVER_HSE
 /* enable HSE driver */
-#define TOSE_DRIVER_HSE 1
+/* #undef TOSE_DRIVER_HSE */
 #endif
 
 #ifndef TOSE_DRIVER_SSE
 /* enable SSE driver */
 #define TOSE_DRIVER_SSE 1
+#endif
+
+#ifndef TOSE_DRIVER_SSSE
+/* enable SSSE driver */
+/* #undef TOSE_DRIVER_SSSE */
 #endif
 
 #endif /* _TOSE_CFG_H_ */

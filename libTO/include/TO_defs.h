@@ -109,14 +109,15 @@ COMPILE_ASSERT(sizeof(TO_key_type_t) == sizeof(uint8_t));
 #define TO_CERT_GENERALIZED_TIME_SIZE  15UL /* YYYYMMDDHHMMSSZ */
 #define TO_CERT_DATE_SIZE ((TO_CERT_GENERALIZED_TIME_SIZE - 1) / 2)
 #define TO_CERT_SUBJECT_PREFIX_SIZE 15UL
-#define TO_SHORTV2_CERT_SIZE (TO_CERTIFICATE_SIZE + TO_CERT_DATE_SIZE)
+#define TO_SHORT_CERT_SIZE (TO_CERTIFICATE_SIZE + TO_CERT_DATE_SIZE)
 
 #define TO_REMOTE_CERTIFICATE_SIZE (TO_SN_SIZE+TO_ECC_PUB_KEYSIZE)
 #define TO_REMOTE_CAID_SIZE TO_SN_CA_ID_SIZE
 
 #define TO_CERT_SUBJECT_CN_MAXSIZE 64UL
 #define TO_CERT_SUBJECT_CN_PREFIX_MAXSIZE (TO_CERT_SUBJECT_CN_MAXSIZE - TO_SN_SIZE * 2)
-#define TO_CERT_DN_MAXSIZE 127UL
+#define TO_X509_DN_DATA_MAXSIZE 127UL
+#define TO_CERT_DN_MAXSIZE (TO_X509_DN_DATA_MAXSIZE + 2UL)
 
 #define TO_KEYTYPE_SIZE TO_SN_CA_ID_SIZE
 #define TO_CA_PUBKEY_SIZE TO_ECC_PUB_KEYSIZE
@@ -165,6 +166,18 @@ COMPILE_ASSERT(sizeof(TO_key_type_t) == sizeof(uint8_t));
 #define TO_DTLS_HEADER_MAXSIZE (TO_DTLS_HEADER_SIZE + TO_DTLS_CONNECTION_ID_MAXSIZE)
 #define TO_DTLS_HANDSHAKE_HEADER_SIZE 12UL
 #define TO_DTLS_HANDSHAKE_HEADER_MAXSIZE (TO_DTLS_HANDSHAKE_HEADER_SIZE + TO_DTLS_CONNECTION_ID_MAXSIZE)
+
+#ifdef TO_ENABLE_DTLS
+#define __TLS_HEADER_SIZE TO_DTLS_HEADER_SIZE
+#define __TLS_HANDSHAKE_HEADER_SIZE TO_DTLS_HANDSHAKE_HEADER_SIZE
+#else
+#define __TLS_HEADER_SIZE TO_TLS_HEADER_SIZE
+#define __TLS_HANDSHAKE_HEADER_SIZE TO_TLS_HANDSHAKE_HEADER_SIZE
+#endif
+
+#define TO_TLS_SERVER_HELLO_DONE_SIZE __TLS_HANDSHAKE_HEADER_SIZE
+#define TO_TLS_SERVER_CERTIFICATE_INIT_SIZE (__TLS_HANDSHAKE_HEADER_SIZE + 3UL)
+#define TO_TLS_FINISHED_PAYLOAD_SIZE (__TLS_HANDSHAKE_HEADER_SIZE + 12UL)
 
 /**
  * @brief Different modes available for TO-Protect TLS
@@ -403,10 +416,8 @@ COMPILE_ASSERT(sizeof(TO_tls_extension_t) == sizeof(uint16_t));
  * Certificates Format
  */
 
-#define TOCERTF_STANDALONE ((unsigned char)0x00)
-#define TOCERTF_SHORT ((unsigned char)0x01)
 #define TOCERTF_X509 ((unsigned char)0x02)
-#define TOCERTF_SHORT_V2 ((unsigned char)0x03)
+#define TOCERTF_SHORT ((unsigned char)0x03)
 #define TOCERTF_NONE ((unsigned char)0xFF)
 #define TOCERTF_UNKNOWN ((unsigned char)0xFE)
 #define TOCERTF_VALIDITY_DATE_SIZE 7UL
@@ -417,29 +428,14 @@ COMPILE_ASSERT(sizeof(TO_tls_extension_t) == sizeof(uint16_t));
  *
  * - TO_CERTIFICATE_X509 is used for Secure Element and remote certificate
  *   verification
- * - TO_CERTIFICATE_STANDALONE is only used for remote certificate
- *   verification
  * - TO_CERTIFICATE_SHORT is only used for Secure Element certificates
  */
 typedef enum TO_certificate_format_e {
-	TO_CERTIFICATE_STANDALONE = TOCERTF_STANDALONE,
-	TO_CERTIFICATE_SHORT = TOCERTF_SHORT,
 	TO_CERTIFICATE_X509 = TOCERTF_X509,
-	TO_CERTIFICATE_SHORT_V2 = TOCERTF_SHORT_V2,
+	TO_CERTIFICATE_SHORT = TOCERTF_SHORT,
 	TO_CERTIFICATE_NONE = TOCERTF_NONE,
 	TO_CERTIFICATE_UNKNOWN = TOCERTF_UNKNOWN
 } PACKED TO_certificate_format_t;
-
-/**
- * Standalone certificate structure
- */
-struct TO_cert_standalone_s {
-	uint8_t ca_id[TO_SN_CA_ID_SIZE]; /**< Certificate Authority ID */
-	uint8_t serial_number[TO_SN_NB_SIZE]; /**< SE serial number */
-	uint8_t public_key[TO_ECC_PUB_KEYSIZE]; /**< Public key */
-	uint8_t signature[TO_SIGNATURE_SIZE]; /**< Certificate signature */
-};
-typedef struct TO_cert_standalone_s TO_cert_standalone_t;
 
 /**
  * Short certificate structure
@@ -447,23 +443,12 @@ typedef struct TO_cert_standalone_s TO_cert_standalone_t;
 struct TO_cert_short_s {
 	uint8_t ca_id[TO_SN_CA_ID_SIZE]; /**< Certificate Authority ID */
 	uint8_t serial_number[TO_SN_NB_SIZE]; /**< SE serial number */
-	uint8_t public_key[TO_ECC_PUB_KEYSIZE]; /**< Public key */
-	uint8_t signature[TO_SIGNATURE_SIZE]; /**< Certificate signature */
-};
-typedef struct TO_cert_short_s TO_cert_short_t;
-
-/**
- * Short v2 certificate structure
- */
-struct TO_cert_short_v2_s {
-	uint8_t ca_id[TO_SN_CA_ID_SIZE]; /**< Certificate Authority ID */
-	uint8_t serial_number[TO_SN_NB_SIZE]; /**< SE serial number */
-	uint8_t date[TOCERTF_VALIDITY_DATE_SIZE]; /**< Validity date (not to be used after xxx)
+	uint8_t not_after[TOCERTF_VALIDITY_DATE_SIZE]; /**< Validity date (not to be used after xxx)
 						    (Zulu date (UTC)) */
 	uint8_t public_key[TO_ECC_PUB_KEYSIZE]; /**< Public key */
 	uint8_t signature[TO_SIGNATURE_SIZE]; /**< Certificate signature */
 };
-typedef struct TO_cert_short_v2_s TO_cert_short_v2_t;
+typedef struct TO_cert_short_s TO_cert_short_t;
 
 typedef enum TO_cert_CA_capabilities_e {
 	TO_CERT_CA_CAP_EMPTY = 0, /**< No capability */
@@ -492,6 +477,20 @@ COMPILE_ASSERT(sizeof(TO_cert_CA_capabilities_t) == sizeof(uint8_t));
  * @{ */
 
 /**
+ * Secure messaging algorithms
+ */
+typedef enum TO_secmsg_alg_e {
+	TO_SECMSG_ALG_UNDEFINED = 0, /**< Undefined */
+	TO_SECMSG_ALG_AES128CBC_HMAC, /**< AES128 CBC encryption with HMAC authentication */
+	TO_SECMSG_ALG_AES128CBC_CMAC, /**< AES128 CBC encryption with CMAC authentication */
+	TO_SECMSG_ALG_AES128GCM, /**< AES128 GCM */
+	TO_SECMSG_ALG_AES128CCM, /**< AES128 CCM */
+	TO_SECMSG_ALG_MAX
+} PACKED TO_secmsg_alg_t;
+
+#define TO_PAYLOAD_IV_SIZE(alg) (((alg) == TO_SECMSG_ALG_AES128CBC_HMAC || (alg) == TO_SECMSG_ALG_AES128CBC_CMAC) ? TO_INITIALVECTOR_SIZE : 0)
+
+/**
  * Encryption algorithms
  */
 typedef enum TO_enc_alg_e {
@@ -516,38 +515,7 @@ typedef enum TO_mac_alg_e {
 
 /** @} */
 
-COMPILE_ASSERT(sizeof(TO_enc_alg_t) == sizeof(uint8_t));
-COMPILE_ASSERT(sizeof(TO_mac_alg_t) == sizeof(uint8_t));
-
-/** @addtogroup payloads
- * @{ */
-
-/**
- * Payload MAC size
- */
-#define TO_PAYLOAD_MAC_SIZE(enc_alg, mac_alg) ((enc_alg) == TO_ENC_ALG_AES128CCM ? TO_AESCCM_TAG_SIZE : ((enc_alg) == TO_ENC_ALG_AES128GCM ? TO_AESGCM_TAG_SIZE : ((enc_alg) == TO_ENC_ALG_AES128CBC ? ((mac_alg) == TO_MAC_ALG_HMAC ? TO_HMAC_SIZE : ((mac_alg) == TO_MAC_ALG_CMAC ? TO_CMAC_SIZE : 0)) : 0)))
-
-/**
- * Payload padding size
- */
-#define TO_PAYLOAD_PADDING_SIZE(enc_alg, data_len) ((enc_alg) == TO_ENC_ALG_AES128CBC ? (((TO_AES_BLOCK_SIZE - (((data_len) + 1) % TO_AES_BLOCK_SIZE)) % TO_AES_BLOCK_SIZE) + 1) : 0)
-
-/**
- * Payload initial vector size
- */
-#define TO_PAYLOAD_IV_SIZE(enc_alg) ((enc_alg) == TO_ENC_ALG_AES128CBC ? TO_INITIALVECTOR_SIZE : 0)
-
-/**
- * Secured payload size from clear data size
- */
-#define TO_PAYLOAD_SECURED_PAYLOAD_SIZE(enc_alg, mac_alg, data_len) (TO_SEQUENCE_SIZE + TO_PAYLOAD_IV_SIZE(enc_alg) + data_len + TO_PAYLOAD_MAC_SIZE(enc_alg, mac_alg) + TO_PAYLOAD_PADDING_SIZE(enc_alg, data_len))
-
-/**
- * Clear data max size from secured payload size
- */
-#define TO_PAYLOAD_CLEAR_DATA_SIZE(enc_alg, mac_alg, payload_len) ((payload_len) - TO_SEQUENCE_SIZE - TO_PAYLOAD_IV_SIZE(enc_alg) - TO_PAYLOAD_MAC_SIZE(enc_alg, mac_alg))
-
-/** @} */
+COMPILE_ASSERT(sizeof(TO_secmsg_alg_t) == sizeof(uint8_t));
 
 /** @addtogroup loader_constants
  * Hardware Secure Element secure bootloader constants

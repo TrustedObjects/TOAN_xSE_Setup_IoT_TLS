@@ -87,7 +87,7 @@ extern TO_lib_ret_t TOSE_helper_tls_handle_server_hello(TOSE_ctx_t *ctx,
  */
 extern TO_lib_ret_t TOSE_helper_tls_handle_server_certificate(TOSE_ctx_t *ctx,
 		const uint8_t *server_certificate,
-		const uint32_t server_certificate_len);
+		const uint16_t server_certificate_len);
 
 /**
  * @brief Handle TLS Server ServerKeyExchange at once
@@ -102,7 +102,7 @@ extern TO_lib_ret_t TOSE_helper_tls_handle_server_certificate(TOSE_ctx_t *ctx,
  */
 extern TO_lib_ret_t TOSE_helper_tls_handle_server_key_exchange(TOSE_ctx_t *ctx,
 		const uint8_t *server_key_exchange,
-		const uint32_t server_key_exchange_len);
+		const uint16_t server_key_exchange_len);
 
 /**
  * @brief Get TLS Certificate at once

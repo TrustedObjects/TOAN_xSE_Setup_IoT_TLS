@@ -18,7 +18,7 @@
 
 #include "POC_settings.h"
 
-#define TO_LOG_LEVEL_MAX 2
+#define TO_LOG_LEVEL_MAX TO_LOG_LEVEL_INF
 
 #define TO_DISABLE_TLS_FULL_DUPLEX
 #define TOSE_HELPER_TLS_IO_BUFFER_SIZE 4096

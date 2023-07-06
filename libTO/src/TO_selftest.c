@@ -11,7 +11,6 @@
  */
 
 #include "TO_cfg.h"
-#ifndef TODRV_SSE_DRIVER_DISABLE
 
 #include "TODRV_SSE_cfg.h"
 #include "TO_retcodes.h"
@@ -503,4 +502,3 @@ TO_lib_ret_t TODRV_SSE_top_self_test(void)
 }
 
 #endif /* TODRV_SSE_ENABLE_SELF_TESTS */
-#endif /* TODRV_SSE_DRIVER_DISABLE */

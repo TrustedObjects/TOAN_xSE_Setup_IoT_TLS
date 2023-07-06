@@ -35,14 +35,29 @@
 /* #undef TODRV_SSE_TOP_ADDRESS */
 #endif
 
+#ifndef TODRV_SSE_TOP_OFFSET_ADDRESS
+/* TO-Protect vector table offset address */
+/* #undef TODRV_SSE_TOP_OFFSET_ADDRESS */
+#endif
+
 #ifndef TODRV_SSE_ENABLE_SELF_TESTS
 /* TO-Protect & NVM self tests */
-/* #undef TODRV_SSE_ENABLE_SELF_TESTS */
+#define TODRV_SSE_ENABLE_SELF_TESTS 1
 #endif
 
 #ifndef TODRV_SSE_NVM_SECTOR_SIZE
 /* NVM SECTOR SIZE */
 /* #undef TODRV_SSE_NVM_SECTOR_SIZE */
+#endif
+
+#ifndef TODRV_SSE_ENABLE_SERIALIZER_HOST_SIDE
+/* Part of the driver used on the host side */
+/* #undef TODRV_SSE_ENABLE_SERIALIZER_HOST_SIDE */
+#endif
+
+#ifndef TODRV_SSE_NVM_INTERFACE
+
+#define TODRV_SSE_NVM_INTERFACE 1
 #endif
 
 #endif /* _TODRV_SSE_CFG_H_ */

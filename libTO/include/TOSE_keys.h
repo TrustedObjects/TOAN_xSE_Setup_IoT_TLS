@@ -91,8 +91,10 @@ extern TO_ret_t TOSE_renew_ecc_keys(TOSE_ctx_t *ctx, const uint8_t key_index);
  * @param[in] ctx Pointer to the SE context
  * @param[in] key_index Public key index
  * @param[out] public_key The requested public key
+ * @param[in,out] public_key_length Public key length
  * @param[out] signature Public key signature, can be verified using the public key
  * of the certificate returned by TOSE_get_certificate()
+ * @param[in,out] signature_length Signature length
  *
  * Signature can be verified using the public key of the certificate returned
  * by TOSE_get_certificate().
@@ -113,15 +115,19 @@ extern TO_ret_t TOSE_renew_ecc_keys(TOSE_ctx_t *ctx, const uint8_t key_index);
  * - TO_DEVICE_READ_ERROR: error reading data from Secure Element
  * - TO_ERROR: generic error
  */
-extern TO_ret_t TOSE_get_public_key(TOSE_ctx_t *ctx, const uint8_t key_index,
-		uint8_t public_key[TO_ECC_PUB_KEYSIZE],
-		uint8_t signature[TO_SIGNATURE_SIZE]);
+extern TO_ret_t TOSE_get_public_key(TOSE_ctx_t *ctx,
+		const uint8_t key_index,
+		uint8_t *public_key,
+		uint16_t *public_key_length,
+		uint8_t *signature,
+		uint16_t *signature_length);
 
 /**
  * @brief Get the public key corresponding to the given index.
  * @param[in] ctx Pointer to the SE context
  * @param[in] key_index Public key index
  * @param[out] public_key The requested public key
+ * @param[in,out] public_key_length The public key length
  *
  * @return
  * - TORSP_SUCCESS on success
@@ -131,8 +137,10 @@ extern TO_ret_t TOSE_get_public_key(TOSE_ctx_t *ctx, const uint8_t key_index,
  * - TO_DEVICE_READ_ERROR: error reading data from Secure Element
  * - TO_ERROR: generic error
  */
-extern TO_ret_t TOSE_get_unsigned_public_key(TOSE_ctx_t *ctx, const uint8_t key_index,
-		uint8_t public_key[TO_ECC_PUB_KEYSIZE]);
+extern TO_ret_t TOSE_get_unsigned_public_key(TOSE_ctx_t *ctx,
+		const uint8_t key_index,
+		uint8_t *public_key,
+		uint16_t *public_key_length);
 
 /**
  * @brief Renew shared keys
@@ -148,6 +156,7 @@ extern TO_ret_t TOSE_get_unsigned_public_key(TOSE_ctx_t *ctx, const uint8_t key_
  * @return
  * - TORSP_SUCCESS on success
  * - TORSP_ARG_OUT_OF_RANGE: invalid key index
+ * - TORSP_COND_OF_USE_NOT_SATISFIED:
  * - TO_DEVICE_WRITE_ERROR: error writing data to Secure Element
  * - TO_DEVICE_READ_ERROR: error reading data from Secure Element
  * - TO_INVALID_RESPONSE_LENGTH: unexpected response length from device

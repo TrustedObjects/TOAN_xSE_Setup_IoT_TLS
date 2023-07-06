@@ -42,6 +42,8 @@
 #include "TO.h"
 #include "mbed.h"
 
+#ifndef TODRV_SSE_DRIVER_DISABLE
+
 /******************************************************************************/
 /* Customer settings (NVM base address, NVM sector size, ...)                 */
 /******************************************************************************/
@@ -50,7 +52,7 @@
 #define SECURE_STORAGE_NVM_ADDRESS 0x8080000
 
 /* See TOP_info.h/TOP_SECURE_STORAGE_NVM_FOOTPRINT; align value to a number of sectors */
-#define SECURE_STORAGE_NVM_SIZE (32*2048)
+#define SECURE_STORAGE_NVM_SIZE (2 * (((TOP_SECURE_STORAGE_NVM_FOOTPRINT + TODRV_SSE_NVM_SECTOR_SIZE -1) / TODRV_SSE_NVM_SECTOR_SIZE) * TODRV_SSE_NVM_SECTOR_SIZE))
 
 /* TODRV_SSE_NVM_SECTOR_SIZE. Platform dependant
    for example:
@@ -293,5 +295,7 @@ memory_error:
 	FLASH_LOG_FUNC("<<< TODRV_SSE_secure_storage_store() MEMORY ERROR\n");
 	return TO_MEMORY_ERROR;
 }
+
+#endif /* TODRV_SSE_DRIVER_DISABLE */
 
 #pragma GCC diagnostic ignored "-Wpedantic"
