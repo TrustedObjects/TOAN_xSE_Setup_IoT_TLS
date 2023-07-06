@@ -207,13 +207,10 @@ int POC_display_se_infos(void)
 
 	uint8_t a, b, c;
 	errTO = TOSE_get_software_version(to_se_ctx, &a, &b, &c);
-	if (errTO != TORSP_SUCCESS)
-	{
+	if (errTO != TORSP_SUCCESS) {
 		TO_LOG_ERR("TO_KO: %d, %d", __LINE__, errTO);
 		goto error_to;
-	}
-	else
-	{
+	} else {
 		TO_LOG_INF("SE version: %d.%d.%d", a, b, c);
 	}
 
@@ -222,14 +219,42 @@ int POC_display_se_infos(void)
 
 	serial_length = sizeof(serial);
  	errTO = TOSE_get_serial_number(to_se_ctx, serial, &serial_length);
-	if (errTO != TORSP_SUCCESS)
-	{
+	if (errTO != TORSP_SUCCESS) {
 		TO_LOG_ERR("TO_KO: %d, %d", __LINE__, errTO);
 		goto error_to;
+	} else {
+		TO_LOG_INF("SE serial: %02X%02X%02X%02X%02X%02X%02X%02X", serial[0], serial[1], serial[2], serial[3], serial[4], serial[5], serial[6], serial[7]);
 	}
-	else
+
+	uint8_t pid[16 +1];
+	uint16_t pid_length= sizeof(pid);
+
+	errTO = TOSE_get_product_id(to_se_ctx, pid, &pid_length);
+	pid[16] = '\0'; /* Set Ascii-Z */
+
+	if (errTO != TORSP_SUCCESS) {
+		TO_LOG_ERR("TO_KO: %d, %d", __LINE__, errTO);
+		goto error_to;
+	} else {
+		TO_LOG_INF("SE product ID: %s", pid);
+	}
+
 	{
-		TO_LOG_DBG("SE serial: %02X%02X%02X%02X%02X%02X%02X%02X", serial[0], serial[1], serial[2], serial[3], serial[4], serial[5], serial[6], serial[7]);
+		uint16_t pn_length= 0;
+		errTO = TOSE_get_product_number(to_se_ctx, NULL, &pn_length);
+
+		uint8_t pn[pn_length +1];
+		pn[pn_length] = '\0'; // Set Ascii-Z
+
+		errTO = TOSE_get_product_number(to_se_ctx, pn, &pn_length);
+
+
+		if (errTO != TORSP_SUCCESS) {
+			TO_LOG_ERR("TO_KO: %d, %d", __LINE__, errTO);
+			goto error_to;
+		} else {
+			TO_LOG_INF("SE product number: %s", pn);
+		}
 	}
 
 	return 0;
